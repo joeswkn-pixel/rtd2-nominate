@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1559B3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:#EAF1FA;font-family:'IBM Plex Sans Thai','IBM Plex Sans',sans-serif;-webkit-font-smoothing:antialiased;color:#0F1B2D}
+a{color:#1559B3;text-decoration:none}
+a:hover{color:#0F4790;text-decoration:underline}
+input,button{font-family:inherit;color:inherit}
+input:focus{outline:2px solid #A9C6EC;outline-offset:0}
+button:not(:disabled){cursor:pointer}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes riseIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;font-size:15px;background:linear-gradient(160deg,#F3F6FA 0%,#EAF1FA 60%,#E2ECF8 100%);">
+<sc-if value="{{ showDemo }}" hint-placeholder-val="{{ false }}">
+  <div style="background:#FFF4DC;color:#7A4F00;padding:7px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;font-size:12px;font-weight:600;">
+    <span>โหมดทดลอง · {{ demoHint }}</span>
+    <sc-for list="{{ demoCodes }}" as="d" hint-placeholder-count="2"><button onClick="{{ d.on }}" style="height:28px;padding:0 10px;border-radius:999px;border:1px solid #E7C77E;background:#fff;color:#7A4F00;font-size:12px;font-weight:600;">{{ d.label }}</button></sc-for>
+  </div>
+</sc-if>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:clamp(12px,4vw,48px) 14px 20px;">
+  <div style="width:100%;max-width:520px;background:#fff;border-radius:28px;box-shadow:0 30px 80px rgba(21,89,179,.10);overflow:hidden;display:flex;flex-direction:column;">
+    <div style="background:linear-gradient(160deg,#2A79D6 0%,#1559B3 50%,#0F2E66 100%);color:#fff;padding:22px 24px;display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;"><img src="assets/pwa-wordmark-white.png" alt="PWA" style="height:30px;width:auto;"><span style="flex:1;"></span><span style="font-size:12px;font-weight:700;letter-spacing:2.4px;opacity:.85;">CHECK-IN</span></div>
+      <div style="font-size:20px;font-weight:700;line-height:1.35;text-wrap:pretty;">{{ title }}</div>
+      <div style="font-size:13px;opacity:.85;">{{ meta }}</div>
+    </div>
+    <div style="padding:22px 24px 24px;display:flex;flex-direction:column;gap:18px;">
+      <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:10px;color:#5A6B85;font-size:14px;"><span style="width:18px;height:18px;border-radius:50%;border:2.4px solid #C9D8F3;border-top-color:#1559B3;animation:spin .9s linear infinite;"></span>กำลังโหลด…</div></sc-if>
+      <sc-if value="{{ notFound }}" hint-placeholder-val="{{ false }}"><div style="font-size:14px;color:#42526B;line-height:1.6;">{{ loadErr }}</div></sc-if>
+
+      <sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="font-size:12.5px;font-weight:700;color:#5A6B85;">ช่วงเช็คชื่อ</div>
+          <sc-for list="{{ sessions }}" as="x" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:1px solid {{ x.bd }};background:{{ x.bg }};">
+              <span style="width:22px;height:22px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:{{ x.dotBg }};color:#fff;border:2px solid {{ x.dotBd }};">{{ x.mark }}</span>
+              <div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:{{ x.fg }};">{{ x.label }}</div><div style="font-size:12px;color:#5A6B85;">{{ x.time }}</div></div>
+              <span style="font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:999px;background:{{ x.pBg }};color:{{ x.pFg }};white-space:nowrap;">{{ x.pill }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ isCode }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:14px;animation:riseIn .35s ease;">
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <label style="font-size:15px;font-weight:700;">รหัสพนักงาน</label>
+              <input value="{{ code }}" onChange="{{ onCode }}" onKeyDown="{{ onCodeKey }}" inputMode="numeric" maxLength="6" placeholder="ตัวเลข 4–6 หลัก" style="height:60px;border-radius:16px;border:1.5px solid {{ codeBd }};padding:0 18px;font-size:22px;letter-spacing:3px;font-variant-numeric:tabular-nums;background:#fff;">
+            </div>
+            <sc-if value="{{ hasErr }}" hint-placeholder-val="{{ false }}"><div style="padding:12px 14px;border-radius:14px;background:#FBE9EB;border:1px solid #F3C6CC;color:#7E1B28;font-size:14px;line-height:1.6;">{{ err }}</div></sc-if>
+            <button onClick="{{ onFind }}" disabled="{{ busy }}" style="height:58px;border-radius:16px;border:none;background:#1559B3;color:#fff;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 12px 26px rgba(21,89,179,.22);">
+              <sc-if value="{{ busy }}" hint-placeholder-val="{{ false }}"><span style="width:18px;height:18px;border-radius:50%;border:2.4px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .8s linear infinite;"></span></sc-if>ถัดไป</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isConfirm }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:14px;animation:riseIn .35s ease;">
+            <div style="border-radius:16px;border:1px solid #E1E9F3;background:#F6F9FD;padding:16px 18px;display:flex;gap:14px;align-items:flex-start;">
+              <span style="width:48px;height:48px;border-radius:14px;background:#1559B3;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex:none;">{{ av }}</span>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;">
+                <div style="font-size:17px;font-weight:700;">{{ name }}</div>
+                <div style="font-size:13.5px;color:#42526B;">{{ pos }}</div>
+                <div style="font-size:13px;color:#5A6B85;line-height:1.5;">{{ unit }}</div>
+                <div style="font-size:12.5px;color:#5A6B85;margin-top:2px;">รหัสพนักงาน <b style="color:#0F1B2D;">{{ empCode }}</b></div>
+              </div>
+            </div>
+            <button onClick="{{ onNotMe }}" style="align-self:flex-start;margin-top:-6px;border:none;background:none;padding:2px 0;color:#1559B3;font-size:13px;font-weight:600;text-decoration:underline;">ไม่ใช่ฉัน — กรอกรหัสใหม่</button>
+            <sc-if value="{{ canSubmit }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <label style="font-size:15px;font-weight:700;">รหัสห้อง 4 หลัก</label>
+                <div style="font-size:13px;color:#5A6B85;margin-top:-4px;">ดูรหัสที่วิทยากรแสดงบนจอในห้องประชุมออนไลน์</div>
+                <input value="{{ room }}" onChange="{{ onRoom }}" onKeyDown="{{ onRoomKey }}" inputMode="numeric" maxLength="4" placeholder="• • • •" style="height:72px;border-radius:16px;border:1.5px solid {{ roomBd }};padding:0 18px;font-size:36px;font-weight:700;letter-spacing:14px;text-align:center;font-variant-numeric:tabular-nums;background:#fff;">
+              </div>
+              <sc-if value="{{ hasErr }}" hint-placeholder-val="{{ false }}"><div style="padding:12px 14px;border-radius:14px;background:#FBE9EB;border:1px solid #F3C6CC;color:#7E1B28;font-size:14px;line-height:1.6;">{{ err }}</div></sc-if>
+              <button onClick="{{ onSubmit }}" disabled="{{ busy }}" style="height:60px;border-radius:16px;border:none;background:#12805C;color:#fff;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 12px 26px rgba(18,128,92,.22);">
+                <sc-if value="{{ busy }}" hint-placeholder-val="{{ false }}"><span style="width:18px;height:18px;border-radius:50%;border:2.4px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .8s linear infinite;"></span></sc-if>ยืนยันเช็คชื่อ</button>
+            </sc-if>
+            <sc-if value="{{ noOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:14px 16px;border-radius:14px;background:#EEF4FC;border:1px solid #CFE0F5;font-size:14px;line-height:1.6;color:#0F1B2D;">{{ noOpenText }}</div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:8px 0;animation:riseIn .35s ease;">
+            <span style="width:84px;height:84px;border-radius:50%;background:#12805C;color:#fff;display:flex;align-items:center;justify-content:center;animation:pop .5s ease;"><svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></span>
+            <div style="font-size:24px;font-weight:700;color:#12805C;">{{ doneTitle }}</div>
+            <div style="font-size:16px;font-weight:700;">{{ name }}</div>
+            <div style="font-size:14px;color:#42526B;">{{ doneSession }} · เวลา {{ doneAt }} น.</div>
+            <button onClick="{{ onAgain }}" style="margin-top:8px;height:48px;padding:0 20px;border-radius:14px;border:1px solid #D6E0EC;background:#fff;color:#1559B3;font-size:14.5px;font-weight:700;">เช็คชื่อให้คนถัดไป</button>
+          </div>
+        </sc-if>
+      </sc-if>
+    </div>
+  </div>
+  <div style="width:100%;max-width:520px;padding:14px 8px;font-size:12px;color:#8A97A8;text-align:center;line-height:1.6;">{{ coordText }}</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const pad=n=>String(n).padStart(2,'0');
+class Component extends DCLogic {
+  state={boot:true,err:'',info:null,off:0,now:Date.now(),step:'code',code:'',room:'',emp:null,done:[],busy:false,ferr:'',ok:null};
+  get N(){return window.NOM2;}
+  componentDidMount(){const files=['./nom2-config.js','./nom2-core.js'];
+    const load=i=>{if(window.NOM2)return this.boot();if(i>=files.length)return;const sc=document.createElement('script');sc.src=files[i];sc.onload=()=>load(i+1);sc.onerror=()=>this.setState({boot:false,err:'โหลดระบบไม่สำเร็จ'});document.head.appendChild(sc);};
+    load(window.NOM2_CONFIG?1:0);this.iv=setInterval(()=>this.setState({now:Date.now()}),20000);}
+  componentWillUnmount(){clearInterval(this.iv);}
+  async boot(){const N=this.N;let cid=(new URL(location.href).searchParams.get('c')||'').toUpperCase();
+    if(!cid&&!N.LIVE){const r=await N.api('open');const x=r.ok&&r.courses.find(z=>z.course.checkin&&z.course.checkin.on);if(x)cid=x.course.id;}
+    if(!cid)return this.setState({boot:false,err:'ลิงก์ไม่ครบถ้วน กรุณาเปิดจากลิงก์ที่ได้รับในห้องประชุมออนไลน์'});this.cid=cid;
+    try{const r=await N.api('ciInfo',{c:cid});this.setState(r.ok?{boot:false,info:r,off:r.now-Date.now()}:{boot:false,err:r.error});}catch(e){this.setState({boot:false,err:'เชื่อมต่อระบบไม่สำเร็จ'});}}
+  async find(){const code=this.state.code;if(!/^\d{4,6}$/.test(code))return this.setState({ferr:'กรุณากรอกรหัสพนักงาน 4–6 หลัก'});
+    this.setState({busy:true,ferr:''});
+    try{const r=await this.N.api('ciCheck',{c:this.cid,code});if(!r.ok)return this.setState({busy:false,ferr:r.error});
+      this.setState({busy:false,emp:r.emp,done:r.done||[],step:'confirm',room:''});}catch(e){this.setState({busy:false,ferr:'เชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่'});}}
+  async submit(){const s=this.state;if(!/^\d{4}$/.test(s.room))return this.setState({ferr:'กรุณากรอกรหัสห้อง 4 หลัก'});
+    this.setState({busy:true,ferr:''});
+    try{const r=await this.N.api('ciSubmit',{c:this.cid,code:s.emp.code||s.code,room:s.room});if(!r.ok)return this.setState({busy:false,ferr:r.error});
+      this.setState({busy:false,step:'done',ok:r});}catch(e){this.setState({busy:false,ferr:'เชื่อมต่อระบบไม่สำเร็จ กรุณากดอีกครั้ง'});}}
+  renderVals(){const s=this.state,N=this.N,info=s.info;
+    const base={loading:s.boot,notFound:!s.boot&&!info,loadErr:s.err,ready:!s.boot&&!!info,title:info?info.course.title:'ระบบเช็คชื่อผู้เข้าอบรม',meta:'',showDemo:!!N&&!N.LIVE,demoCodes:[],demoHint:'',coordText:'กองฝึกอบรมภูมิภาค 2 · การประปาส่วนภูมิภาค'};
+    if(!info)return base;const c=info.course,now=s.now+s.off,sess=info.sessions.map(x=>Object.assign({},x,{state:N.ciWin(x,now)}));
+    const open=sess.filter(x=>x.state==='open'),doneIds=(s.step==='done'&&s.ok?[{session:(sess.find(x=>x.label===s.ok.session)||{}).id}]:[]).concat(s.done).map(d=>d.session);
+    const P={open:['เปิดเช็คชื่อ','#E7F5EE','#12805C'],soon:['ยังไม่ถึงเวลา','#EEF4FC','#1559B3'],done:['สิ้นสุดแล้ว','#F1F4F8','#5A6B85']};
+    const showS=sess.filter(x=>x.state==='open'||x.date===N.iso(now)).length?sess.filter(x=>x.state==='open'||x.date===N.iso(now)):sess.filter(x=>x.state==='soon').slice(0,2);
+    const e=s.emp||{};
+    Object.assign(base,{meta:'รุ่นที่ '+c.round+' · '+N.fmtRange(c.start,c.end)+' · '+N.placeText(c),
+      coordText:c.coord&&c.coord.name?'มีปัญหาเช็คชื่อ ติดต่อ '+c.coord.name+(c.coord.phone?' · โทร '+c.coord.phone:''):base.coordText,
+      sessions:showS.map(x=>{const ck=doneIds.indexOf(x.id)>=0,p=ck?['เช็คชื่อแล้ว','#E7F5EE','#12805C']:P[x.state];return {key:x.id,label:x.label,time:N.fmtDs(N.toMs(x.date))+' · '+x.start+'–'+x.end+' น.',pill:p[0],pBg:p[1],pFg:p[2],
+        mark:ck?'✓':'',dotBg:ck?'#12805C':'#fff',dotBd:ck?'#12805C':x.state==='open'?'#1E9E6E':'#CFD8E3',bd:x.state==='open'?'#CBEBDB':'#E6EAF2',bg:x.state==='open'?'#F4FBF7':'#fff',fg:x.state==='done'?'#8A97A8':'#0F1B2D'};}),
+      isCode:s.step==='code',isConfirm:s.step==='confirm',isDone:s.step==='done',busy:s.busy,hasErr:!!s.ferr,err:s.ferr,
+      code:s.code,codeBd:s.ferr&&s.step==='code'?'#E3A3AC':'#D6E0EC',onCode:ev=>this.setState({code:ev.target.value.replace(/\D/g,'').slice(0,6),ferr:''}),onCodeKey:ev=>{if(ev.key==='Enter')this.find();},onFind:()=>this.find(),
+      av:String(e.name||'?').replace(/^(นางสาว|นาย|นาง)/,'').slice(0,1),name:e.name||'',pos:[e.pos,e.level?'ระดับ '+e.level:''].filter(Boolean).join(' · '),unit:[e.unit,e.affil].filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).join(' · '),empCode:e.code||s.code,
+      onNotMe:()=>this.setState({step:'code',code:'',emp:null,ferr:''}),canSubmit:open.length>0,noOpen:!open.length,
+      noOpenText:sess.some(x=>x.state==='soon')?'ขณะนี้ยังไม่เปิดเช็คชื่อ ระบบเปิดก่อนเริ่มแต่ละช่วง 30 นาที':'ช่วงเช็คชื่อของหลักสูตรนี้สิ้นสุดแล้ว',
+      room:s.room,roomBd:s.ferr&&s.step==='confirm'?'#E3A3AC':'#D6E0EC',onRoom:ev=>this.setState({room:ev.target.value.replace(/\D/g,'').slice(0,4),ferr:''}),onRoomKey:ev=>{if(ev.key==='Enter')this.submit();},onSubmit:()=>this.submit(),
+      doneTitle:s.ok&&s.ok.already?'เช็คชื่อไว้แล้ว':'เช็คชื่อสำเร็จ',doneSession:s.ok?s.ok.session:'',doneAt:s.ok?(()=>{const d=new Date(s.ok.at);return pad(d.getHours())+':'+pad(d.getMinutes());})():'',
+      onAgain:()=>this.setState({step:'code',code:'',emp:null,room:'',ok:null,done:[],ferr:''})});
+    if(!N.LIVE){base.demoHint='รหัสห้องช่วงทดสอบ = 2468';base.demoCodes=N.demoCodes.slice(0,3).map(d=>({key:d.code,label:d.label+' · '+d.code,on:()=>this.setState({code:d.code,ferr:''})}));}
+    return base;}
+}
+</script>
+</body>
+</html>

@@ -141,7 +141,7 @@ class Component extends DCLogic {
     const P={open:['เปิดเช็คชื่อ','#E7F5EE','#12805C'],soon:['ยังไม่ถึงเวลา','#EEF4FC','#1559B3'],done:['สิ้นสุดแล้ว','#F1F4F8','#5A6B85']};
     const showS=sess.filter(x=>x.state==='open'||x.date===N.iso(now)).length?sess.filter(x=>x.state==='open'||x.date===N.iso(now)):sess.filter(x=>x.state==='soon').slice(0,2);
     const e=s.emp||{};
-    Object.assign(base,{meta:'รุ่นที่ '+c.round+' · '+N.fmtRange(c.start,c.end)+' · '+N.placeText(c),
+    Object.assign(base,{meta:(c.courseNo?'เลขที่หลักสูตร '+c.courseNo+' · ':'')+'รุ่นที่ '+c.round+' · '+N.fmtRange(c.start,c.end)+' · '+N.placeText(c),
       coordText:c.coord&&c.coord.name?'มีปัญหาเช็คชื่อ ติดต่อ '+c.coord.name+(c.coord.phone?' · โทร '+c.coord.phone:''):base.coordText,
       sessions:showS.map(x=>{const ck=doneIds.indexOf(x.id)>=0,p=ck?['เช็คชื่อแล้ว','#E7F5EE','#12805C']:P[x.state];return {key:x.id,label:x.label,time:N.fmtDs(N.toMs(x.date))+' · '+x.start+'–'+x.end+' น.',pill:p[0],pBg:p[1],pFg:p[2],
         mark:ck?'✓':'',dotBg:ck?'#12805C':'#fff',dotBd:ck?'#12805C':x.state==='open'?'#1E9E6E':'#CFD8E3',bd:x.state==='open'?'#CBEBDB':'#E6EAF2',bg:x.state==='open'?'#F4FBF7':'#fff',fg:x.state==='done'?'#8A97A8':'#0F1B2D'};}),

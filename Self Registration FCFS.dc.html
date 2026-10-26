@@ -9,26 +9,34 @@
 <x-dc>
 <helmet>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#1559B3">
+<meta name="theme-color" content="#0B2A5B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
-body{background:#F3F6FA;font-family:'IBM Plex Sans Thai','IBM Plex Sans',sans-serif;-webkit-font-smoothing:antialiased;color:#0F1B2D}
+body{background:#F4F7FB;font-family:'IBM Plex Sans Thai','IBM Plex Sans',sans-serif;-webkit-font-smoothing:antialiased;color:#0F1B2D}
 a{color:#1559B3;text-decoration:none}
 a:hover{color:#0F4790;text-decoration:underline}
 input,button{font-family:inherit;color:inherit}
-input:focus{outline:2px solid #A9C6EC;outline-offset:0}
 button:not(:disabled){cursor:pointer}
+::placeholder{color:#A3AFBF;letter-spacing:0;font-weight:400}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-@keyframes riseIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes ping{0%{transform:scale(1);opacity:.6}80%,100%{transform:scale(2.6);opacity:0}}
+@keyframes riseIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes popIn{0%{opacity:0;transform:scale(.85) translateY(10px)}60%{opacity:1;transform:scale(1.03)}100%{transform:none}}
+@keyframes ringOut{0%{box-shadow:0 0 0 0 rgba(18,128,92,.45)}100%{box-shadow:0 0 0 18px rgba(18,128,92,0)}}
+@keyframes numPop{0%{transform:scale(.6);opacity:0}55%{transform:scale(1.12);opacity:1}100%{transform:none}}
+@keyframes tearTop{0%{transform:none}55%{transform:rotate(-3.4deg) translate(-8px,-6px)}100%{transform:rotate(-2.4deg) translate(-6px,-4px)}}
+@keyframes tearBot{0%{transform:none}55%{transform:rotate(2.6deg) translate(10px,14px)}100%{transform:rotate(1.8deg) translate(8px,11px)}}
+@keyframes stampIn{0%{opacity:0;transform:scale(2.2) rotate(-12deg)}100%{opacity:.9;transform:rotate(-12deg)}}
+@keyframes drift{0%{transform:translate(0,0)}50%{transform:translate(18px,-14px)}100%{transform:translate(0,0)}}
 @media print{[data-noprint]{display:none!important}}
 </style>
 </helmet>
-<div style="min-height:100vh;display:flex;flex-direction:column;font-size:15px;background:linear-gradient(160deg,#F3F6FA 0%,#EAF1FA 60%,#E2ECF8 100%);">
+<div style="min-height:100vh;display:flex;flex-direction:column;font-size:15px;background:#F4F7FB;">
 
 <sc-if value="{{ showDemo }}" hint-placeholder-val="{{ false }}">
   <div data-noprint="" style="background:#FFF4DC;color:#7A4F00;padding:7px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;font-size:12px;font-weight:600;">
@@ -37,116 +45,168 @@ button:not(:disabled){cursor:pointer}
   </div>
 </sc-if>
 
-<div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:clamp(10px,3vw,40px) clamp(10px,3vw,32px) 20px;">
-  <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
-    <div style="flex:1;display:flex;align-items:center;gap:10px;color:#5A6B85;font-size:14px;"><span style="width:18px;height:18px;border-radius:50%;border:2.4px solid #C9D8F3;border-top-color:#1559B3;animation:spin .9s linear infinite;"></span>กำลังโหลด…</div>
-  </sc-if>
-  <sc-if value="{{ notFound }}" hint-placeholder-val="{{ false }}">
-    <div style="margin:auto;max-width:440px;background:#fff;border-radius:24px;padding:32px 28px;text-align:center;display:flex;flex-direction:column;gap:10px;box-shadow:0 30px 80px rgba(21,89,179,.10);">
+<sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:10px;color:#5A6B85;font-size:14px;"><span style="width:18px;height:18px;border-radius:50%;border:2.4px solid #C9D8F3;border-top-color:#1559B3;animation:spin .9s linear infinite;"></span>กำลังโหลด…</div>
+</sc-if>
+<sc-if value="{{ notFound }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px;">
+    <div style="max-width:440px;background:#fff;border-radius:28px;padding:36px 30px;text-align:center;display:flex;flex-direction:column;gap:10px;box-shadow:0 30px 80px rgba(11,42,91,.10);">
       <img src="assets/pwa-logo-new.png" alt="PWA" style="height:40px;width:auto;align-self:center;">
       <div style="font-size:22px;font-weight:700;">ไม่พบหลักสูตร</div>
       <div style="font-size:14px;color:#5A6B85;line-height:1.6;">{{ loadErr }}</div>
     </div>
-  </sc-if>
+  </div>
+</sc-if>
 
-  <sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
-  <div style="width:100%;max-width:1180px;background:#fff;border-radius:28px;padding:12px;box-shadow:0 30px 80px rgba(21,89,179,.10);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:12px;">
+<sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;display:flex;flex-wrap:wrap;align-items:flex-start;">
 
-    <div data-screen-label="Course hero" style="position:relative;min-height:300px;border-radius:20px;overflow:hidden;background:linear-gradient(160deg,#2A79D6 0%,#1559B3 45%,#0F2E66 100%);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(20px,3vw,40px);">
-      <sc-if value="{{ hasCover }}" hint-placeholder-val="{{ false }}"><div role="img" aria-label="{{ title }}" style="position:absolute;inset:0;background-size:cover;background-position:center;background-image:{{ coverBg }};"></div></sc-if>
-      <sc-if value="{{ noCover }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,27,45,0) 30%,rgba(15,35,90,.4) 70%,rgba(15,30,80,.75) 100%);"></div></sc-if>
-      <div style="position:relative;display:flex;gap:8px;flex-wrap:wrap;">
-        <span style="display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 14px;border-radius:999px;background:rgba(15,27,45,.35);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(8px);font-size:12.5px;font-weight:600;"><span style="width:7px;height:7px;border-radius:50%;background:#6EE7B7;"></span>{{ placeChip }}</span>
-        <span style="display:inline-flex;align-items:center;height:30px;padding:0 14px;border-radius:999px;background:rgba(15,27,45,.35);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(8px);font-size:12.5px;font-weight:600;">{{ dateChip }}</span>
+  <aside data-screen-label="Course hero" style="flex:1 1 440px;position:{{ Z.heroPos }};top:0;min-height:{{ Z.heroMinH }};height:{{ Z.heroH }};overflow:hidden;background:#0B2A5B;color:#fff;display:flex;flex-direction:column;padding:{{ Z.heroPad }};">
+    <sc-if value="{{ hasCover }}" hint-placeholder-val="{{ false }}"><div role="img" aria-label="{{ title }}" style="position:absolute;inset:0;background-size:cover;background-position:center;background-image:{{ coverBg }};transform:scale(1.04);"></div></sc-if>
+    <div style="position:absolute;width:520px;height:520px;border-radius:50%;right:-180px;top:-160px;background:radial-gradient(circle,rgba(92,194,255,.35) 0%,rgba(92,194,255,0) 65%);animation:drift 14s ease-in-out infinite;"></div>
+    <div style="position:absolute;width:420px;height:420px;border-radius:50%;left:-160px;bottom:-120px;background:radial-gradient(circle,rgba(30,158,110,.28) 0%,rgba(30,158,110,0) 65%);animation:drift 18s ease-in-out infinite reverse;"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,24,56,.55) 0%,rgba(8,24,56,.15) 30%,rgba(8,24,56,.55) 62%,rgba(6,20,48,.94) 100%);"></div>
+
+    <div style="position:relative;display:flex;align-items:center;gap:12px;">
+      <img src="assets/pwa-wordmark-white.png" alt="PWA" style="height:26px;width:auto;">
+      <span style="flex:1;"></span>
+      <span style="display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 13px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(10px);font-size:11.5px;font-weight:700;letter-spacing:1.6px;">SELF REGISTRATION</span>
+    </div>
+
+    <div style="position:relative;margin-top:auto;padding-top:{{ Z.heroTop }};display:flex;flex-direction:column;gap:14px;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <span style="display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 13px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(10px);font-size:12.5px;font-weight:600;"><span style="width:7px;height:7px;border-radius:50%;background:#6EE7B7;"></span>{{ placeChip }}</span>
+        <span style="display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 13px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(10px);font-size:12.5px;font-weight:600;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>{{ dateChip }}</span>
       </div>
-      <sc-if value="{{ noCover }}" hint-placeholder-val="{{ true }}">
-        <div style="position:relative;display:flex;flex-direction:column;gap:10px;margin-top:60px;">
-          <span style="width:48px;height:3px;border-radius:2px;background:rgba(255,255,255,.7);"></span>
-          <div style="font-size:15px;opacity:.9;">รหัสหลักสูตร {{ cid }} · รุ่นที่ {{ round }}</div>
-          <div style="font-size:clamp(28px,3.6vw,44px);font-weight:700;line-height:1.2;text-wrap:pretty;">{{ title }}</div>
-          <sc-if value="{{ hasTarget }}" hint-placeholder-val="{{ false }}"><div style="font-size:15px;opacity:.9;">กลุ่มเป้าหมาย: {{ target }}</div></sc-if>
+      <div style="font-size:14px;font-weight:500;color:rgba(255,255,255,.82);letter-spacing:.3px;">{{ roundLine }}</div>
+      <div style="display:flex;flex-direction:column;font-size:{{ tSize }};font-weight:700;line-height:1.08;letter-spacing:-.6px;text-wrap:balance;text-shadow:0 2px 24px rgba(5,15,40,.35);">
+        <span>{{ tHead }}</span>
+        <sc-if value="{{ hasAccent }}" hint-placeholder-val="{{ false }}"><span style="color:#8FD3FF;">{{ tAccent }}</span></sc-if>
+      </div>
+      <sc-if value="{{ hasSub }}" hint-placeholder-val="{{ false }}"><div style="font-size:clamp(15px,1.5vw,18px);font-weight:600;line-height:1.5;text-wrap:pretty;max-width:30em;color:rgba(255,255,255,.95);">{{ tSub }}</div></sc-if>
+      <sc-if value="{{ hasTarget }}" hint-placeholder-val="{{ false }}"><div style="font-size:13.5px;color:rgba(255,255,255,.78);line-height:1.55;">กลุ่มเป้าหมาย · {{ target }}</div></sc-if>
+      <sc-if value="{{ Z.showLive }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:8px;display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(14px);max-width:420px;">
+          <span style="position:relative;width:10px;height:10px;flex:none;"><span style="position:absolute;inset:0;border-radius:50%;background:{{ M.dot }};animation:ping 1.8s cubic-bezier(0,0,.2,1) infinite;"></span><span style="position:absolute;inset:0;border-radius:50%;background:{{ M.dot }};"></span></span>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;"><span style="font-size:12px;color:rgba(255,255,255,.75);font-weight:600;">{{ M.label }} · ที่นั่งว่างรวม</span><span style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.3px;">{{ Z.totText }}</span></div>
+          <span style="font-size:11.5px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums;text-align:right;">{{ Z.liveNote }}</span>
         </div>
       </sc-if>
     </div>
+  </aside>
 
-    <div style="padding:clamp(18px,4vw,52px) clamp(16px,4vw,52px) clamp(18px,3vw,32px);display:flex;flex-direction:column;gap:22px;min-width:0;">
-      <img src="assets/pwa-logo-new.png" alt="PWA" style="height:44px;width:auto;align-self:flex-start;">
+  <main style="flex:1 1 520px;min-width:0;position:relative;z-index:2;margin-top:{{ Z.mainMt }};border-radius:{{ Z.mainRad }};background:#fff;min-height:{{ Z.mainMinH }};display:flex;flex-direction:column;">
+    <div style="width:100%;max-width:580px;margin:0 auto;padding:{{ Z.mainPad }};display:flex;flex-direction:column;gap:26px;flex:1;">
 
-      <!-- LANDING -->
-      <sc-if value="{{ isLanding }}" hint-placeholder-val="{{ true }}">
-      <div data-screen-label="01 Landing" style="display:flex;flex-direction:column;gap:22px;animation:riseIn .4s ease;">
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <div style="font-size:12.5px;font-weight:700;letter-spacing:2.6px;color:#1559B3;">SELF REGISTRATION</div>
-          <div style="font-size:clamp(32px,4vw,44px);font-weight:700;line-height:1.15;">สมัครฝึกอบรม</div>
-          <div style="font-size:14.5px;color:#5A6B85;line-height:1.6;text-wrap:pretty;">ใครส่งก่อนได้ที่นั่งก่อน ที่นั่งเต็มแล้วยังสมัครต่อได้ในรายชื่อสำรอง</div>
-        </div>
-
-        <div style="border-radius:20px;border:1px solid {{ M.bd }};background:{{ M.bg }};padding:18px 20px;display:flex;flex-direction:column;gap:12px;">
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-            <span style="display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 12px;border-radius:999px;background:#fff;color:{{ M.fg }};font-size:12.5px;font-weight:700;border:1px solid {{ M.bd }};"><span style="width:8px;height:8px;border-radius:50%;background:{{ M.dot }};animation:pulse 1.6s ease-in-out infinite;"></span>{{ M.label }}</span>
-            <span style="flex:1;"></span>
-            <span style="font-size:12px;color:#5A6B85;font-variant-numeric:tabular-nums;">{{ M.sub }}</span>
-          </div>
-          <sc-if value="{{ M.isNotYet }}" hint-placeholder-val="{{ false }}">
-            <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;color:#1559B3;"><span style="font-size:18px;font-weight:600;">เปิดรับใน</span><span style="font-size:clamp(44px,6vw,60px);font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-1px;">{{ M.cd }}</span></div>
-            <div style="font-size:12.5px;color:#42526B;">{{ M.openText }} · ช่องกรอกจะเปิดอัตโนมัติ</div>
-          </sc-if>
-          <sc-for list="{{ M.regions }}" as="g" hint-placeholder-count="2">
-            <div style="display:flex;flex-direction:column;gap:6px;">
-              <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;"><span style="font-size:14px;font-weight:700;color:#0F1B2D;">{{ g.label }}</span><span style="flex:1;"></span><span style="font-size:15px;font-weight:700;color:{{ g.fg }};font-variant-numeric:tabular-nums;">{{ g.text }}</span></div>
-              <div style="height:8px;border-radius:999px;background:rgba(15,27,45,.08);overflow:hidden;"><div style="height:100%;width:{{ g.pct }};background:{{ g.bar }};border-radius:999px;transition:width .6s ease;"></div></div>
+      <sc-if value="{{ Z.hasSteps }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <sc-for list="{{ Z.steps }}" as="st" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:8px;flex:{{ st.flex }};min-width:0;">
+              <span style="width:28px;height:28px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;background:{{ st.bg }};border:1.5px solid {{ st.bd }};color:{{ st.fg }};transition:background .4s ease,border-color .4s ease,color .4s ease;">{{ st.mark }}</span>
+              <span style="font-size:13px;font-weight:{{ st.fw }};color:{{ st.lc }};white-space:nowrap;transition:color .4s ease;">{{ st.label }}</span>
+              <sc-if value="{{ st.hasLine }}" hint-placeholder-val="{{ true }}"><span style="flex:1;min-width:12px;height:2px;border-radius:2px;background:{{ st.line }};transition:background .4s ease;"></span></sc-if>
             </div>
           </sc-for>
         </div>
+      </sc-if>
+
+      <!-- LANDING -->
+      <sc-if value="{{ isLanding }}" hint-placeholder-val="{{ true }}">
+      <div data-screen-label="01 Landing" style="display:flex;flex-direction:column;gap:24px;animation:riseIn .45s cubic-bezier(.2,.7,.2,1);">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="font-size:clamp(30px,3.6vw,40px);font-weight:700;line-height:1.12;letter-spacing:-.6px;">สมัครฝึกอบรม</div>
+          <div style="font-size:15px;color:#5A6B85;line-height:1.6;text-wrap:pretty;">ใครส่งก่อนได้ที่นั่งก่อน — ที่นั่งเต็มแล้วยังสมัครต่อได้ในรายชื่อสำรอง และจะเลื่อนขึ้นอัตโนมัติเมื่อมีผู้สละสิทธิ์</div>
+        </div>
+
+        <div style="border-radius:24px;border:1px solid #E3EAF3;background:linear-gradient(180deg,#FBFCFE 0%,#F5F8FC 100%);padding:18px;display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 12px;border-radius:999px;background:{{ M.bg }};color:{{ M.fg }};font-size:12.5px;font-weight:700;border:1px solid {{ M.bd }};"><span style="position:relative;width:8px;height:8px;"><span style="position:absolute;inset:0;border-radius:50%;background:{{ M.dot }};animation:ping 1.8s cubic-bezier(0,0,.2,1) infinite;"></span><span style="position:absolute;inset:0;border-radius:50%;background:{{ M.dot }};"></span></span>{{ M.label }}</span>
+            <span style="flex:1;"></span>
+            <sc-if value="{{ M.hasSync }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ M.onNow }}" disabled="{{ M.busy }}" title="รีเฟรชตอนนี้" style="display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 6px 0 12px;border-radius:999px;border:1px solid #E3EAF3;background:#fff;color:#42526B;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;" style-hover="border-color:#A9C6EC;">
+                <span>{{ M.nextText }}</span>
+                <span style="width:24px;height:24px;border-radius:50%;background:{{ Z.syncRing }};display:flex;align-items:center;justify-content:center;transition:background 1s linear;"><span style="width:18px;height:18px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;color:{{ M.fg }};"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="animation:{{ M.spin }};"><path d="M21 2v6h-6M3 22v-6h6M3.5 9a9 9 0 0 1 14.9-3.4L21 8M20.5 15a9 9 0 0 1-14.9 3.4L3 16"></path></svg></span></span>
+              </button>
+            </sc-if>
+          </div>
+          <sc-if value="{{ M.isNotYet }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:6px;padding:16px;border-radius:18px;background:#fff;border:1px solid #E3EAF3;">
+              <span style="font-size:13px;font-weight:600;color:#5A6B85;">เปิดรับสมัครใน</span>
+              <span style="font-size:clamp(34px,5vw,48px);font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-1px;color:#1559B3;">{{ M.cd }}</span>
+              <span style="font-size:12.5px;color:#5A6B85;">{{ M.openText }} · ช่องกรอกจะเปิดให้อัตโนมัติ</span>
+            </div>
+          </sc-if>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px;">
+            <sc-for list="{{ M.regions }}" as="g" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:18px;background:#fff;border:1px solid #E3EAF3;box-shadow:0 1px 2px rgba(15,27,45,.04);position:relative;overflow:hidden;">
+                <div style="position:absolute;inset:0;background:{{ g.flBg }};transition:background .8s ease;pointer-events:none;"></div>
+                <div style="position:relative;flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;">
+                  <span style="font-size:13px;font-weight:600;color:#42526B;">{{ g.label }}</span>
+                  <span style="font-size:30px;font-weight:700;line-height:1.05;color:{{ g.fg }};font-variant-numeric:tabular-nums;letter-spacing:-.5px;">{{ g.big }}</span>
+                  <span style="font-size:12px;color:#5A6B85;">{{ g.cap }}</span>
+                </div>
+                <span style="position:relative;width:54px;height:54px;border-radius:50%;flex:none;background:{{ g.ring }};display:flex;align-items:center;justify-content:center;transition:background .6s ease;"><span style="width:42px;height:42px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#42526B;font-variant-numeric:tabular-nums;">{{ g.pctTxt }}</span></span>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ M.hasSync }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#8A97A8;display:flex;gap:6px;flex-wrap:wrap;"><span>{{ M.syncText }}</span><span>·</span><span>{{ M.sub }}</span></div></sc-if>
+        </div>
 
         <sc-if value="{{ isClosed }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;flex-direction:column;gap:6px;padding:16px 18px;border-radius:16px;background:#F1F4F8;border:1px solid #DCE3EC;">
+          <div style="display:flex;flex-direction:column;gap:6px;padding:18px 20px;border-radius:20px;background:#F1F4F8;border:1px solid #DCE3EC;">
             <div style="font-size:16px;font-weight:700;">ปิดรับสมัครแล้ว</div>
             <div style="font-size:13.5px;color:#42526B;line-height:1.6;">ปิดรับเมื่อ {{ dlText }} ผู้สมัครยังตรวจสอบผลและลำดับได้ตามปกติ</div>
           </div>
-          <button onClick="{{ goLookup }}" style="height:56px;border-radius:14px;border:none;background:#1559B3;color:#fff;font-size:16px;font-weight:700;box-shadow:0 12px 26px rgba(21,89,179,.22);">ดูผล/ลำดับของฉัน</button>
+          <button onClick="{{ goLookup }}" style="height:58px;border-radius:16px;border:none;background:#1559B3;color:#fff;font-size:16px;font-weight:700;box-shadow:0 14px 30px rgba(21,89,179,.25);" style-hover="background:#0F4790;">ดูผล/ลำดับของฉัน</button>
         </sc-if>
 
         <sc-if value="{{ notClosed }}" hint-placeholder-val="{{ true }}">
           <sc-if value="{{ L.showTabs }}" hint-placeholder-val="{{ false }}">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:14px;background:#EEF2F7;">
-              <sc-for list="{{ L.tabs }}" as="t" hint-placeholder-count="2"><button type="button" onClick="{{ t.on }}" style="height:44px;border:none;border-radius:11px;background:{{ t.bg }};color:{{ t.fg }};font-size:14.5px;font-weight:700;box-shadow:{{ t.sh }};font-family:inherit;cursor:pointer;">{{ t.label }}</button></sc-for>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:16px;background:#EEF2F7;">
+              <sc-for list="{{ L.tabs }}" as="t" hint-placeholder-count="2"><button type="button" onClick="{{ t.on }}" style="height:46px;border:none;border-radius:12px;background:{{ t.bg }};color:{{ t.fg }};font-size:14.5px;font-weight:700;box-shadow:{{ t.sh }};transition:background .25s ease,color .25s ease,box-shadow .25s ease;">{{ t.label }}</button></sc-for>
             </div>
           </sc-if>
           <sc-if value="{{ L.isEmp }}" hint-placeholder-val="{{ true }}">
           <div style="display:flex;flex-direction:column;gap:8px;">
-            <label style="font-size:14px;font-weight:600;">รหัสพนักงาน <span style="color:#B3283A;">*</span></label>
-            <input value="{{ L.emp }}" onChange="{{ L.onEmp }}" onKeyDown="{{ L.onKey }}" disabled="{{ L.lock }}" inputMode="numeric" maxLength="6" placeholder="{{ L.ph }}" style="height:54px;border-radius:14px;border:1px solid {{ L.inBd }};background:{{ L.inBg }};padding:0 18px;font-size:17px;letter-spacing:2px;font-variant-numeric:tabular-nums;">
-            <sc-if value="{{ L.hasErr }}" hint-placeholder-val="{{ false }}"><div style="font-size:13.5px;color:#B3283A;line-height:1.55;">{{ L.err }}</div></sc-if>
+            <label style="font-size:13.5px;font-weight:600;color:#2B3645;">รหัสพนักงาน <span style="color:#B3283A;">*</span></label>
+            <div style="position:relative;display:flex;align-items:center;">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#8A97A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:18px;pointer-events:none;"><rect x="3" y="5" width="18" height="14" rx="3"></rect><circle cx="9" cy="11" r="2.2"></circle><path d="M5.8 16c.6-1.6 1.8-2.4 3.2-2.4s2.6.8 3.2 2.4M14.5 10h4M14.5 13.5h3"></path></svg>
+              <input value="{{ L.emp }}" onChange="{{ L.onEmp }}" onKeyDown="{{ L.onKey }}" disabled="{{ L.lock }}" inputMode="numeric" maxLength="6" placeholder="{{ L.ph }}" style-focus="outline:none;border-color:#1559B3;box-shadow:0 0 0 4px rgba(21,89,179,.14);" style="height:58px;border-radius:16px;border:1.5px solid {{ L.inBd }};background:#fff;padding:0 18px;font-size:16px;min-width:0;width:100%;transition:border-color .2s ease,box-shadow .2s ease;height:62px;padding-left:54px;font-size:20px;font-weight:600;letter-spacing:3px;font-variant-numeric:tabular-nums;background:{{ L.inBg }};">
+            </div>
+            <sc-if value="{{ L.hasErr }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#B3283A;font-weight:500;line-height:1.55;">{{ L.err }}</div></sc-if>
           </div>
           <sc-if value="{{ L.dup }}" hint-placeholder-val="{{ false }}">
-            <div style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:#EEF4FC;border:1px solid #CFE0F5;">
+            <div style="display:flex;gap:12px;align-items:flex-start;padding:16px;border-radius:18px;background:#EEF4FC;border:1px solid #CFE0F5;animation:riseIn .3s ease;">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1559B3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h.01"></path></svg>
-              <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+              <div style="flex:1;display:flex;flex-direction:column;gap:10px;">
                 <div style="font-size:14px;line-height:1.6;"><b>รหัสนี้สมัครรุ่นนี้แล้ว</b><br><span style="color:#42526B;">ระบบไม่สร้างใบสมัครซ้ำ ดูลำดับเดิมได้จากปุ่มด้านล่าง</span></div>
-                <button onClick="{{ goLookup }}" style="align-self:flex-start;height:40px;padding:0 16px;border-radius:10px;border:1px solid #1559B3;background:#fff;color:#1559B3;font-size:13.5px;font-weight:700;">ดูลำดับของฉัน</button>
+                <button onClick="{{ goLookup }}" style="align-self:flex-start;height:40px;padding:0 16px;border-radius:12px;border:1px solid #1559B3;background:#fff;color:#1559B3;font-size:13.5px;font-weight:700;">ดูลำดับของฉัน</button>
               </div>
             </div>
           </sc-if>
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <button onClick="{{ L.onCheck }}" disabled="{{ L.btnOff }}" style="height:56px;border-radius:14px;border:none;background:{{ L.btnBg }};color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 12px 26px rgba(21,89,179,.22);">
-              <sc-if value="{{ L.checking }}" hint-placeholder-val="{{ false }}"><span style="width:18px;height:18px;border-radius:50%;border:2.4px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .8s linear infinite;"></span></sc-if>{{ L.btnText }}</button>
-            <button onClick="{{ goLookup }}" style="height:50px;border-radius:14px;border:1px solid #D6E0EC;background:#fff;color:#1559B3;font-size:14.5px;font-weight:600;" style-hover="background:#F3F7FC;">เคยสมัครแล้ว? ดูผล/ลำดับของฉัน</button>
+            <div style="position:{{ Y.ctaPos }};bottom:0;z-index:6;margin:{{ Y.ctaM }};padding:{{ Y.ctaP }};background:{{ Y.ctaBg }};box-shadow:{{ Y.ctaSh }};display:flex;flex-direction:column;">
+            <button onClick="{{ L.onCheck }}" disabled="{{ L.btnOff }}" style="height:60px;border-radius:16px;border:none;background:{{ L.btnBg }};color:#fff;font-size:16.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 14px 30px rgba(21,89,179,.25);transition:transform .15s ease,filter .2s ease;" style-hover="filter:brightness(1.07);" style-active="transform:scale(.985);">
+              <sc-if value="{{ L.checking }}" hint-placeholder-val="{{ false }}"><span style="width:18px;height:18px;border-radius:50%;border:2.4px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .8s linear infinite;"></span></sc-if>{{ L.btnText }}<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+            </div>
+            <button onClick="{{ goLookup }}" style="height:50px;border-radius:16px;border:none;background:transparent;color:#1559B3;font-size:14.5px;font-weight:600;" style-hover="background:#F3F7FC;">เคยสมัครแล้ว? ดูผล/ลำดับของฉัน</button>
           </div>
           </sc-if>
           <sc-if value="{{ L.isExt }}" hint-placeholder-val="{{ false }}">
-            <div style="padding:14px 16px;border-radius:14px;background:#F6F9FD;border:1px solid #E1E9F3;font-size:13.5px;color:#42526B;line-height:1.6;text-wrap:pretty;">สำหรับผู้ที่ไม่ใช่พนักงาน กปภ. — กรอกคำนำหน้า ชื่อ-นามสกุล หน่วยงานต้นสังกัด เบอร์มือถือ และ E-mail ในขั้นถัดไป</div>
+            <div style="padding:16px;border-radius:18px;background:#F6F9FD;border:1px solid #E3EAF3;font-size:13.5px;color:#42526B;line-height:1.6;text-wrap:pretty;">สำหรับผู้ที่ไม่ใช่พนักงาน กปภ. — กรอกคำนำหน้า ชื่อ-นามสกุล หน่วยงานต้นสังกัด เบอร์มือถือ และ E-mail ในขั้นถัดไป</div>
             <div style="display:flex;flex-direction:column;gap:10px;">
-              <button onClick="{{ L.onExt }}" disabled="{{ L.lock }}" style="height:56px;border-radius:14px;border:none;background:{{ L.btnBg }};color:#fff;font-size:16px;font-weight:700;box-shadow:0 12px 26px rgba(21,89,179,.22);">{{ L.extBtn }}</button>
-              <button onClick="{{ goLookup }}" style="height:50px;border-radius:14px;border:1px solid #D6E0EC;background:#fff;color:#1559B3;font-size:14.5px;font-weight:600;" style-hover="background:#F3F7FC;">เคยสมัครแล้ว? ดูผล/ลำดับของฉัน</button>
+              <div style="position:{{ Y.ctaPos }};bottom:0;z-index:6;margin:{{ Y.ctaM }};padding:{{ Y.ctaP }};background:{{ Y.ctaBg }};box-shadow:{{ Y.ctaSh }};display:flex;flex-direction:column;">
+              <button onClick="{{ L.onExt }}" disabled="{{ L.lock }}" style="height:60px;border-radius:16px;border:none;background:{{ L.btnBg }};color:#fff;font-size:16.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 14px 30px rgba(21,89,179,.25);" style-hover="filter:brightness(1.07);">{{ L.extBtn }}<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+              </div>
+              <button onClick="{{ goLookup }}" style="height:50px;border-radius:16px;border:none;background:transparent;color:#1559B3;font-size:14.5px;font-weight:600;" style-hover="background:#F3F7FC;">เคยสมัครแล้ว? ดูผล/ลำดับของฉัน</button>
             </div>
           </sc-if>
         </sc-if>
 
-        <div style="border-radius:18px;background:#F6F9FD;border:1px solid #E1E9F3;padding:18px 20px;display:flex;flex-direction:column;gap:12px;">
-          <div style="font-size:13px;font-weight:700;">เงื่อนไขการสมัคร</div>
+        <div style="display:flex;flex-direction:column;gap:12px;padding-top:4px;">
+          <div style="font-size:13px;font-weight:700;color:#8A97A8;">เงื่อนไขการสมัคร</div>
           <sc-for list="{{ rules }}" as="r" hint-placeholder-count="4">
-            <div style="display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:#42526B;line-height:1.55;"><span style="flex:none;width:6px;height:6px;border-radius:50%;background:#1559B3;margin-top:8px;"></span><span>{{ r.t }}</span></div>
+            <div style="display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:#42526B;line-height:1.6;"><span style="flex:none;width:22px;height:22px;border-radius:8px;background:#EEF4FC;color:#1559B3;display:flex;align-items:center;justify-content:center;margin-top:1px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></span><span>{{ r.t }}</span></div>
           </sc-for>
         </div>
       </div>
@@ -154,78 +214,77 @@ button:not(:disabled){cursor:pointer}
 
       <!-- FORM -->
       <sc-if value="{{ isForm }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="02 Identity + form" style="display:flex;flex-direction:column;gap:18px;animation:riseIn .4s ease;">
-        <div style="position:sticky;top:0;z-index:5;margin:0 -4px;padding:4px;background:#fff;">
+      <div data-screen-label="02 Identity + form" style="display:flex;flex-direction:column;gap:20px;animation:riseIn .45s cubic-bezier(.2,.7,.2,1);">
+        <div style="position:sticky;top:0;z-index:5;margin:0 -6px;padding:6px;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-radius:0 0 18px 18px;">
           <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;background:{{ F.mBg }};border:1px solid {{ F.mBd }};">
-            <span style="width:8px;height:8px;border-radius:50%;background:{{ F.mBar }};animation:pulse 1.6s ease-in-out infinite;flex:none;"></span>
+            <span style="position:relative;width:8px;height:8px;flex:none;"><span style="position:absolute;inset:0;border-radius:50%;background:{{ F.mBar }};animation:ping 1.8s cubic-bezier(0,0,.2,1) infinite;"></span><span style="position:absolute;inset:0;border-radius:50%;background:{{ F.mBar }};"></span></span>
             <span style="font-size:13.5px;font-weight:700;color:{{ F.mFg }};flex:none;">{{ F.mText }}</span>
-            <div style="flex:1;min-width:60px;height:6px;border-radius:999px;background:rgba(15,27,45,.08);overflow:hidden;"><div style="height:100%;width:{{ F.mPct }};background:{{ F.mBar }};transition:width .6s ease;"></div></div>
+            <div style="flex:1;min-width:50px;height:6px;border-radius:999px;background:rgba(15,27,45,.08);overflow:hidden;"><div style="height:100%;width:{{ F.mPct }};background:{{ F.mBar }};border-radius:999px;transition:width .6s ease;"></div></div>
             <span style="font-size:11.5px;color:#5A6B85;font-variant-numeric:tabular-nums;flex:none;">{{ asOf }}</span>
           </div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:4px;">
-          <div style="font-size:12.5px;font-weight:700;letter-spacing:2.6px;color:#1559B3;">ขั้นที่ 2 จาก 2</div>
-          <div style="font-size:30px;font-weight:700;line-height:1.2;">{{ F.title }}</div>
-        </div>
+        <div style="font-size:clamp(26px,3vw,32px);font-weight:700;line-height:1.2;letter-spacing:-.4px;">{{ F.title }}</div>
         <sc-if value="{{ F.isEmp }}" hint-placeholder-val="{{ true }}">
-        <div style="border-radius:18px;border:1px solid #E1E9F3;background:#F6F9FD;padding:18px 20px;display:flex;gap:14px;align-items:flex-start;">
-          <span style="width:48px;height:48px;border-radius:14px;background:#1559B3;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex:none;">{{ F.av }}</span>
-          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;">
+        <div style="border-radius:22px;background:linear-gradient(135deg,#0F3A72 0%,#1559B3 60%,#2A79D6 100%);color:#fff;padding:18px 20px;display:flex;gap:14px;align-items:center;box-shadow:0 16px 36px rgba(21,89,179,.22);">
+          <span style="width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700;flex:none;">{{ F.av }}</span>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;">
             <div style="font-size:17px;font-weight:700;">{{ F.name }}</div>
-            <div style="font-size:13.5px;color:#42526B;">{{ F.pos }}</div>
-            <div style="font-size:13px;color:#5A6B85;line-height:1.5;">{{ F.unit }}</div>
-            <div style="font-size:12.5px;color:#5A6B85;margin-top:4px;font-variant-numeric:tabular-nums;">รหัสพนักงาน <b style="color:#0F1B2D;">{{ F.emp }}</b></div>
+            <div style="font-size:13px;color:rgba(255,255,255,.85);">{{ F.pos }}</div>
+            <div style="font-size:12.5px;color:rgba(255,255,255,.75);line-height:1.5;">{{ F.unit }}</div>
           </div>
+          <div style="flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:2px;"><span style="font-size:11px;color:rgba(255,255,255,.7);">รหัสพนักงาน</span><b style="font-size:16px;font-variant-numeric:tabular-nums;letter-spacing:1px;">{{ F.emp }}</b></div>
         </div>
-        <button onClick="{{ F.notMe }}" disabled="{{ F.lock }}" style="align-self:flex-start;margin-top:-8px;border:none;background:none;padding:4px 0;color:#1559B3;font-size:13px;font-weight:600;text-decoration:underline;">ไม่ใช่ฉัน — กรอกรหัสใหม่</button>
+        <button onClick="{{ F.notMe }}" disabled="{{ F.lock }}" style="align-self:flex-start;margin-top:-8px;border:none;background:none;padding:4px 0;color:#1559B3;font-size:13px;font-weight:600;">ไม่ใช่ฉัน — กรอกรหัสใหม่</button>
         </sc-if>
         <sc-if value="{{ F.isExt }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:16px;">
-            <div style="display:flex;flex-direction:column;gap:8px;"><label style="font-size:14px;font-weight:600;">คำนำหน้า <span style="color:#B3283A;">*</span></label>
-              <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                <sc-for list="{{ F.prefixes }}" as="p" hint-placeholder-count="4"><button type="button" onClick="{{ p.on }}" disabled="{{ F.lock }}" style="height:44px;padding:0 16px;border-radius:12px;border:1.5px solid {{ p.bd }};background:{{ p.bg }};color:{{ p.fg }};font-size:14.5px;font-weight:600;font-family:inherit;cursor:pointer;">{{ p.label }}</button></sc-for>
+            <div style="display:flex;flex-direction:column;gap:8px;"><label style="font-size:13.5px;font-weight:600;color:#2B3645;">คำนำหน้า <span style="color:#B3283A;">*</span></label>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                <sc-for list="{{ F.prefixes }}" as="p" hint-placeholder-count="4"><button type="button" onClick="{{ p.on }}" disabled="{{ F.lock }}" style="height:44px;padding:0 18px;border-radius:999px;border:1.5px solid {{ p.bd }};background:{{ p.bg }};color:{{ p.fg }};font-size:14.5px;font-weight:600;transition:background .2s ease,border-color .2s ease,color .2s ease;">{{ p.label }}</button></sc-for>
               </div>
-              <sc-if value="{{ F.pfOther }}" hint-placeholder-val="{{ false }}"><input value="{{ F.pfText }}" onChange="{{ F.onPfText }}" disabled="{{ F.lock }}" placeholder="ระบุคำนำหน้า เช่น ดร., ว่าที่ ร.ต." style="height:52px;border-radius:14px;border:1px solid {{ F.pfBd }};padding:0 16px;font-size:16px;background:{{ F.inBg }};min-width:0;"></sc-if>
-              <sc-if value="{{ F.pfErr }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#B3283A;">กรุณาเลือกหรือระบุคำนำหน้า</div></sc-if>
+              <sc-if value="{{ F.pfOther }}" hint-placeholder-val="{{ false }}"><input value="{{ F.pfText }}" onChange="{{ F.onPfText }}" disabled="{{ F.lock }}" placeholder="ระบุคำนำหน้า เช่น ดร., ว่าที่ ร.ต." style-focus="outline:none;border-color:#1559B3;box-shadow:0 0 0 4px rgba(21,89,179,.14);" style="height:58px;border-radius:16px;border:1.5px solid {{ F.pfBd }};background:#fff;padding:0 18px;font-size:16px;min-width:0;width:100%;transition:border-color .2s ease,box-shadow .2s ease;background:{{ F.inBg }};"></sc-if>
+              <sc-if value="{{ F.pfErr }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#B3283A;font-weight:500;">กรุณาเลือกหรือระบุคำนำหน้า</div></sc-if>
             </div>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px 12px;">
-              <div style="display:flex;flex-direction:column;gap:8px;min-width:0;"><label style="font-size:14px;font-weight:600;">ชื่อ <span style="color:#B3283A;">*</span></label><input value="{{ F.fn }}" onChange="{{ F.onFn }}" disabled="{{ F.lock }}" placeholder="ชื่อจริง" autoComplete="given-name" style="height:52px;border-radius:14px;border:1px solid {{ F.fnBd }};padding:0 16px;font-size:16px;background:{{ F.inBg }};min-width:0;"><sc-if value="{{ F.fnErr }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#B3283A;">กรุณากรอกชื่อ</div></sc-if></div>
-              <div style="display:flex;flex-direction:column;gap:8px;min-width:0;"><label style="font-size:14px;font-weight:600;">นามสกุล <span style="color:#B3283A;">*</span></label><input value="{{ F.ln }}" onChange="{{ F.onLn }}" disabled="{{ F.lock }}" placeholder="นามสกุล" autoComplete="family-name" style="height:52px;border-radius:14px;border:1px solid {{ F.lnBd }};padding:0 16px;font-size:16px;background:{{ F.inBg }};min-width:0;"><sc-if value="{{ F.lnErr }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#B3283A;">กรุณากรอกนามสกุล</div></sc-if></div>
+              <div style="display:flex;flex-direction:column;gap:8px;min-width:0;"><label style="font-size:13.5px;font-weight:600;color:#2B3645;">ชื่อ <span style="color:#B3283A;">*</span></label><input value="{{ F.fn }}" onChange="{{ F.onFn }}" disabled="{{ F.lock }}" placeholder="ชื่อจริง" autoComplete="given-name" style-focus="outline:none;border-color:#1559B3;box-shadow:0 0 0 4px rgba(21,89,179,.14);" style="height:58px;border-radius:16px;border:1.5px solid {{ F.fnBd }};background:#fff;padding:0 18px;font-size:16px;min-width:0;width:100%;transition:border-color .2s ease,box-shadow .2s ease;background:{{ F.inBg }};"><sc-if value="{{ F.fnErr }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#B3283A;font-weight:500;">กรุณากรอกชื่อ</div></sc-if></div>
+              <div style="display:flex;flex-direction:column;gap:8px;min-width:0;"><label style="font-size:13.5px;font-weight:600;color:#2B3645;">นามสกุล <span style="color:#B3283A;">*</span></label><input value="{{ F.ln }}" onChange="{{ F.onLn }}" disabled="{{ F.lock }}" placeholder="นามสกุล" autoComplete="family-name" style-focus="outline:none;border-color:#1559B3;box-shadow:0 0 0 4px rgba(21,89,179,.14);" style="height:58px;border-radius:16px;border:1.5px solid {{ F.lnBd }};background:#fff;padding:0 18px;font-size:16px;min-width:0;width:100%;transition:border-color .2s ease,box-shadow .2s ease;background:{{ F.inBg }};"><sc-if value="{{ F.lnErr }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#B3283A;font-weight:500;">กรุณากรอกนามสกุล</div></sc-if></div>
             </div>
-            <div style="display:flex;flex-direction:column;gap:8px;"><label style="font-size:14px;font-weight:600;">หน่วยงาน / องค์กรต้นสังกัด <span style="color:#B3283A;">*</span></label><input value="{{ F.org }}" onChange="{{ F.onOrg }}" disabled="{{ F.lock }}" placeholder="เช่น เทศบาลเมืองขอนแก่น" autoComplete="organization" style="height:52px;border-radius:14px;border:1px solid {{ F.ogBd }};padding:0 16px;font-size:16px;background:{{ F.inBg }};min-width:0;"><sc-if value="{{ F.ogErr }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#B3283A;">กรุณากรอกหน่วยงานต้นสังกัด</div></sc-if></div>
-            <div style="display:flex;flex-direction:column;gap:8px;"><label style="font-size:14px;font-weight:600;">ตำแหน่ง <span style="font-weight:400;color:#8A97A8;">(ถ้ามี)</span></label><input value="{{ F.xpos }}" onChange="{{ F.onXpos }}" disabled="{{ F.lock }}" placeholder="ตำแหน่งงาน" autoComplete="organization-title" style="height:52px;border-radius:14px;border:1px solid {{ F.xpBd }};padding:0 16px;font-size:16px;background:{{ F.inBg }};min-width:0;"></div>
+            <div style="display:flex;flex-direction:column;gap:8px;"><label style="font-size:13.5px;font-weight:600;color:#2B3645;">หน่วยงาน / องค์กรต้นสังกัด <span style="color:#B3283A;">*</span></label><input value="{{ F.org }}" onChange="{{ F.onOrg }}" disabled="{{ F.lock }}" placeholder="เช่น เทศบาลเมืองขอนแก่น" autoComplete="organization" style-focus="outline:none;border-color:#1559B3;box-shadow:0 0 0 4px rgba(21,89,179,.14);" style="height:58px;border-radius:16px;border:1.5px solid {{ F.ogBd }};background:#fff;padding:0 18px;font-size:16px;min-width:0;width:100%;transition:border-color .2s ease,box-shadow .2s ease;background:{{ F.inBg }};"><sc-if value="{{ F.ogErr }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#B3283A;font-weight:500;">กรุณากรอกหน่วยงานต้นสังกัด</div></sc-if></div>
+            <div style="display:flex;flex-direction:column;gap:8px;"><label style="font-size:13.5px;font-weight:600;color:#2B3645;">ตำแหน่ง <span style="font-weight:400;color:#8A97A8;">(ถ้ามี)</span></label><input value="{{ F.xpos }}" onChange="{{ F.onXpos }}" disabled="{{ F.lock }}" placeholder="ตำแหน่งงาน" autoComplete="organization-title" style-focus="outline:none;border-color:#1559B3;box-shadow:0 0 0 4px rgba(21,89,179,.14);" style="height:58px;border-radius:16px;border:1.5px solid {{ F.xpBd }};background:#fff;padding:0 18px;font-size:16px;min-width:0;width:100%;transition:border-color .2s ease,box-shadow .2s ease;background:{{ F.inBg }};"></div>
           </div>
         </sc-if>
         <sc-if value="{{ F.full }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:#FDF0E4;border:1px solid #F2CFAE;color:#7A3D00;">
+          <div style="display:flex;gap:12px;align-items:flex-start;padding:16px;border-radius:18px;background:#FDF0E4;border:1px solid #F2CFAE;color:#7A3D00;">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B85C00" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px;"><path d="M12 3l9.5 17h-19z"></path><path d="M12 10v4M12 17h.01"></path></svg>
             <div style="font-size:14px;line-height:1.6;"><b>ที่นั่ง{{ F.regionLabel }}เต็มแล้ว</b> — หากยืนยันต่อจะเป็นรายชื่อสำรอง ลำดับที่ {{ F.nextWait }}</div>
           </div>
         </sc-if>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <label style="font-size:14px;font-weight:600;">E-mail สำหรับติดต่อ <span style="color:#B3283A;">*</span></label>
-          <input type="email" value="{{ F.email }}" onChange="{{ F.onEmail }}" disabled="{{ F.lock }}" placeholder="name@example.com" autoComplete="email" style="height:52px;border-radius:14px;border:1px solid {{ F.emBd }};padding:0 16px;font-size:16px;background:{{ F.inBg }};">
-          <sc-if value="{{ F.emErr }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#B3283A;">กรุณากรอก E-mail ให้ถูกต้อง</div></sc-if>
-          <div style="font-size:12px;color:#8A97A8;">ใช้ E-mail ใดก็ได้ที่ท่านเปิดอ่านประจำ</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:16px 12px;">
+          <div style="display:flex;flex-direction:column;gap:8px;min-width:0;">
+            <label style="font-size:13.5px;font-weight:600;color:#2B3645;">E-mail สำหรับติดต่อ <span style="color:#B3283A;">*</span></label>
+            <input type="email" value="{{ F.email }}" onChange="{{ F.onEmail }}" disabled="{{ F.lock }}" placeholder="name@example.com" autoComplete="email" style-focus="outline:none;border-color:#1559B3;box-shadow:0 0 0 4px rgba(21,89,179,.14);" style="height:58px;border-radius:16px;border:1.5px solid {{ F.emBd }};background:#fff;padding:0 18px;font-size:16px;min-width:0;width:100%;transition:border-color .2s ease,box-shadow .2s ease;background:{{ F.inBg }};">
+            <sc-if value="{{ F.emErr }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#B3283A;font-weight:500;">กรุณากรอก E-mail ให้ถูกต้อง</div></sc-if>
+            <div style="font-size:12px;color:#8A97A8;">ใช้ E-mail ใดก็ได้ที่เปิดอ่านประจำ</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;min-width:0;">
+            <label style="font-size:13.5px;font-weight:600;color:#2B3645;">เบอร์โทรศัพท์มือถือ <span style="color:#B3283A;">*</span></label>
+            <input type="tel" inputMode="numeric" value="{{ F.phone }}" onChange="{{ F.onPhone }}" disabled="{{ F.lock }}" placeholder="0XXXXXXXXX" maxLength="10" style-focus="outline:none;border-color:#1559B3;box-shadow:0 0 0 4px rgba(21,89,179,.14);" style="height:58px;border-radius:16px;border:1.5px solid {{ F.phBd }};background:#fff;padding:0 18px;font-size:16px;min-width:0;width:100%;transition:border-color .2s ease,box-shadow .2s ease;letter-spacing:1px;font-variant-numeric:tabular-nums;background:{{ F.inBg }};">
+            <sc-if value="{{ F.phErr }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#B3283A;font-weight:500;">กรุณากรอกเบอร์ 10 หลัก ขึ้นต้นด้วย 0</div></sc-if>
+            <div style="font-size:12px;color:#8A97A8;">{{ F.phHint }}</div>
+          </div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <label style="font-size:14px;font-weight:600;">เบอร์โทรศัพท์มือถือ <span style="color:#B3283A;">*</span></label>
-          <input type="tel" inputMode="numeric" value="{{ F.phone }}" onChange="{{ F.onPhone }}" disabled="{{ F.lock }}" placeholder="0XXXXXXXXX" maxLength="10" style="height:52px;border-radius:14px;border:1px solid {{ F.phBd }};padding:0 16px;font-size:16px;letter-spacing:1px;font-variant-numeric:tabular-nums;background:{{ F.inBg }};">
-          <sc-if value="{{ F.phErr }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#B3283A;">กรุณากรอกเบอร์ 10 หลัก ขึ้นต้นด้วย 0</div></sc-if>
-          <div style="font-size:12px;color:#8A97A8;">{{ F.phHint }}</div>
-        </div>
-        <label style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:14px;border:1px solid {{ F.pdBd }};background:#fff;cursor:pointer;">
+        <label style="display:flex;gap:12px;align-items:flex-start;padding:16px;border-radius:18px;border:1.5px solid {{ F.pdBd }};background:#FAFCFE;cursor:pointer;transition:border-color .2s ease;">
           <input type="checkbox" checked="{{ F.pdpa }}" onChange="{{ F.onPdpa }}" disabled="{{ F.lock }}" style="width:20px;height:20px;margin:2px 0 0;accent-color:#1559B3;flex:none;">
           <span style="font-size:13.5px;line-height:1.6;color:#42526B;">ยินยอมให้ กปภ. เก็บและใช้ข้อมูลส่วนบุคคลข้างต้นเพื่อการจัดฝึกอบรมหลักสูตรนี้ ตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562</span>
         </label>
         <sc-if value="{{ F.saveErr }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:#FBE9EB;border:1px solid #F3C6CC;color:#7E1B28;">
+          <div style="display:flex;gap:12px;align-items:flex-start;padding:16px;border-radius:18px;background:#FBE9EB;border:1px solid #F3C6CC;color:#7E1B28;">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B3283A" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px;"><circle cx="12" cy="12" r="9"></circle><path d="M15 9l-6 6M9 9l6 6"></path></svg>
             <div style="font-size:14px;line-height:1.6;"><b>{{ F.saveErrTitle }}</b><br>กดอีกครั้งได้อย่างปลอดภัย ระบบจะไม่สร้างใบสมัครซ้ำ</div>
           </div>
         </sc-if>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <button onClick="{{ F.onSubmit }}" disabled="{{ F.lock }}" style="height:58px;border-radius:14px;border:none;background:{{ F.btnBg }};color:#fff;font-size:16.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 16px;box-shadow:0 12px 26px rgba(21,89,179,.2);">
+        <div style="position:{{ Y.ctaPos }};bottom:0;z-index:6;margin:{{ Y.ctaM }};padding:{{ Y.ctaP }};background:{{ Y.ctaBg }};box-shadow:{{ Y.ctaSh }};display:flex;flex-direction:column;gap:8px;">
+          <button onClick="{{ F.onSubmit }}" disabled="{{ F.lock }}" style="height:62px;border-radius:16px;border:none;background:{{ F.btnBg }};color:#fff;font-size:16.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 16px;box-shadow:0 14px 30px rgba(21,89,179,.25);transition:transform .15s ease,filter .2s ease;" style-hover="filter:brightness(1.07);" style-active="transform:scale(.985);">
             <sc-if value="{{ F.lock }}" hint-placeholder-val="{{ false }}"><span style="width:18px;height:18px;border-radius:50%;border:2.4px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .8s linear infinite;flex:none;"></span></sc-if>{{ F.btnText }}</button>
           <div style="font-size:12.5px;color:#5A6B85;text-align:center;">{{ F.note }}</div>
         </div>
@@ -234,54 +293,96 @@ button:not(:disabled){cursor:pointer}
 
       <!-- RESULT -->
       <sc-if value="{{ isResult }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="03 Result" style="display:flex;flex-direction:column;gap:20px;animation:riseIn .4s ease;">
-        <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;">
-          <span style="display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 16px;border-radius:999px;background:{{ R.bBg }};color:{{ R.bFg }};font-size:14px;font-weight:700;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg>{{ R.badge }}</span>
-          <sc-if value="{{ R.active }}" hint-placeholder-val="{{ true }}">
-            <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;color:{{ R.bFg }};">
-              <span style="font-size:20px;font-weight:600;">{{ R.pre }}</span>
-              <span style="font-size:clamp(64px,8vw,88px);font-weight:700;line-height:1;letter-spacing:-2px;font-variant-numeric:tabular-nums;">{{ R.num }}</span>
-              <span style="font-size:22px;font-weight:600;">{{ R.unit }}</span>
+      <div data-screen-label="03 Result" style="display:flex;flex-direction:column;gap:20px;animation:riseIn .45s cubic-bezier(.2,.7,.2,1);">
+        <sc-if value="{{ R.celebrate }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:20px;background:linear-gradient(120deg,#E7F5EE 0%,#F4FBF7 100%);border:1px solid #BFE3CF;animation:popIn .7s cubic-bezier(.2,1.2,.4,1) both;">
+            <span style="flex:none;width:52px;height:52px;border-radius:50%;background:#12805C;color:#fff;display:flex;align-items:center;justify-content:center;animation:ringOut 1.4s ease-out .4s 3;"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"></path><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"></path></svg></span>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;">
+              <div style="font-size:19px;font-weight:700;color:#0E5C40;">ยินดีด้วย! คุณสมัครทัน</div>
+              <div style="font-size:13.5px;color:#2B5A47;line-height:1.5;text-wrap:pretty;">{{ R.celeSub }}</div>
             </div>
-          </sc-if>
-          <div style="font-size:14px;color:#42526B;line-height:1.6;text-wrap:pretty;">{{ R.desc }}</div>
+            <button onClick="{{ R.onCele }}" style="flex:none;height:36px;padding:0 12px;border-radius:10px;border:1px solid #BFE3CF;background:#fff;color:#12805C;font-size:12.5px;font-weight:700;">ฉลองอีกครั้ง</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ R.notWd }}" hint-placeholder-val="{{ true }}">
+        <div style="border-radius:26px;overflow:hidden;box-shadow:0 24px 60px rgba(11,42,91,.14);border:1px solid #E3EAF3;background:#fff;">
+          <div style="position:relative;padding:22px 22px 26px;background:{{ R.bFg }};color:#fff;overflow:hidden;">
+            <div style="position:absolute;width:260px;height:260px;border-radius:50%;right:-80px;top:-120px;background:rgba(255,255,255,.12);"></div>
+            <div style="position:absolute;width:140px;height:140px;border-radius:50%;right:60px;bottom:-90px;background:rgba(255,255,255,.08);"></div>
+            <div style="position:relative;display:flex;flex-direction:column;gap:12px;">
+              <span style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);font-size:13.5px;font-weight:700;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg>{{ R.badge }}</span>
+              <sc-if value="{{ R.active }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
+                  <span style="font-size:18px;font-weight:600;opacity:.92;">{{ R.pre }}</span>
+                  <span style="font-size:clamp(64px,10vw,96px);font-weight:700;line-height:.95;letter-spacing:-3px;font-variant-numeric:tabular-nums;display:inline-block;animation:{{ R.numAnim }};">{{ R.num }}</span>
+                  <span style="font-size:20px;font-weight:600;opacity:.92;">{{ R.unit }}</span>
+                </div>
+              </sc-if>
+              <div style="font-size:14px;line-height:1.6;text-wrap:pretty;color:rgba(255,255,255,.92);">{{ R.desc }}</div>
+            </div>
+          </div>
+          <div style="position:relative;height:0;border-top:2px dashed #E3EAF3;">
+            <span style="position:absolute;left:-13px;top:-13px;width:24px;height:24px;border-radius:50%;background:#fff;border:1px solid #E3EAF3;"></span>
+            <span style="position:absolute;right:-13px;top:-13px;width:24px;height:24px;border-radius:50%;background:#fff;border:1px solid #E3EAF3;"></span>
+          </div>
+          <div style="padding:20px 22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:14px 18px;">
+            <div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:12px;color:#5A6B85;">เลขที่รับสมัคร</span><span style="font-size:19px;font-weight:700;font-family:'IBM Plex Sans',sans-serif;letter-spacing:.5px;color:#0F3A72;">{{ R.ref }}</span></div>
+            <div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:12px;color:#5A6B85;">เวลาที่ระบบบันทึก</span><span style="font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;">{{ R.at }}</span></div>
+            <div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:12px;color:#5A6B85;">ผู้สมัคร</span><span style="font-size:14.5px;font-weight:600;">{{ R.name }}</span></div>
+            <div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:12px;color:#5A6B85;">โควตา</span><span style="font-size:14.5px;font-weight:600;">{{ R.region }}</span></div>
+          </div>
         </div>
+
+        </sc-if>
+        <sc-if value="{{ R.isWd }}" hint-placeholder-val="{{ false }}">
+          <div style="position:relative;display:flex;flex-direction:column;padding:8px 4px 14px;filter:drop-shadow(0 18px 28px rgba(11,42,91,.13));">
+            <div style="position:relative;background:{{ R.bFg }};color:#fff;border-radius:26px 26px 0 0;padding:22px 22px 36px;clip-path:{{ Z.tearTop }};transform-origin:0% 100%;animation:tearTop 1s cubic-bezier(.3,1.25,.4,1) .15s both;overflow:hidden;">
+              <div style="position:absolute;width:260px;height:260px;border-radius:50%;right:-80px;top:-120px;background:rgba(255,255,255,.1);"></div>
+              <div style="position:relative;display:flex;flex-direction:column;gap:12px;">
+                <span style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);font-size:13.5px;font-weight:700;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>{{ R.badge }}</span>
+                <div style="font-size:14px;line-height:1.6;text-wrap:pretty;color:rgba(255,255,255,.92);max-width:28em;">{{ R.desc }}</div>
+              </div>
+              <div style="position:absolute;right:18px;top:20px;padding:6px 14px;border:3px solid #fff;border-radius:10px;color:#fff;font-size:17px;font-weight:700;letter-spacing:2px;font-family:'IBM Plex Sans',sans-serif;opacity:.9;animation:stampIn .5s cubic-bezier(.2,1.4,.4,1) .9s both;">VOID</div>
+            </div>
+            <div style="background:#fff;border-radius:0 0 26px 26px;padding:30px 22px 20px;margin-top:-10px;clip-path:{{ Z.tearBot }};transform-origin:100% 0%;animation:tearBot 1s cubic-bezier(.3,1.25,.4,1) .15s both;">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:14px 18px;">
+              <div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:12px;color:#5A6B85;">เลขที่รับสมัคร</span><span style="font-size:19px;font-weight:700;font-family:'IBM Plex Sans',sans-serif;letter-spacing:.5px;color:#5A6B85;text-decoration:line-through;text-decoration-color:rgba(179,40,58,.55);">{{ R.ref }}</span></div>
+              <div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:12px;color:#5A6B85;">เวลาที่ระบบบันทึก</span><span style="font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;color:#42526B;">{{ R.at }}</span></div>
+              <div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:12px;color:#5A6B85;">ผู้สมัคร</span><span style="font-size:14.5px;font-weight:600;color:#42526B;">{{ R.name }}</span></div>
+              <div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:12px;color:#5A6B85;">โควตา</span><span style="font-size:14.5px;font-weight:600;color:#42526B;">{{ R.region }}</span></div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
         <sc-if value="{{ R.hasMoved }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;border-radius:14px;background:#EEF8F3;border:1px solid #CBEBDB;font-size:14px;">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;border-radius:18px;background:#EEF8F3;border:1px solid #CBEBDB;font-size:14px;">
             <span style="color:#5A6B85;">ลำดับเดิม</span><b style="color:#B85C00;">{{ R.movedFrom }}</b>
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#12805C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
             <span style="color:#5A6B85;">ลำดับปัจจุบัน</span><b style="color:#12805C;">{{ R.movedTo }}</b>
           </div>
         </sc-if>
-        <div style="border-radius:18px;border:1px solid #E1E9F3;background:#F6F9FD;padding:16px 18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:12px 18px;">
-          <div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:12px;color:#5A6B85;">เลขที่รับสมัคร</span><span style="font-size:20px;font-weight:700;font-family:'IBM Plex Sans',sans-serif;letter-spacing:.5px;">{{ R.ref }}</span></div>
-          <div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:12px;color:#5A6B85;">เวลาที่ระบบบันทึก</span><span style="font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;">{{ R.at }}</span></div>
-          <div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:12px;color:#5A6B85;">ผู้สมัคร</span><span style="font-size:14px;font-weight:600;">{{ R.name }}</span></div>
-          <div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:12px;color:#5A6B85;">โควตา</span><span style="font-size:14px;font-weight:600;">{{ R.region }}</span></div>
-        </div>
         <sc-if value="{{ R.active }}" hint-placeholder-val="{{ true }}">
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="display:flex;gap:10px;flex-wrap:wrap;">
-              <button onClick="{{ R.onCal }}" style="flex:1;min-width:150px;height:50px;border-radius:14px;border:none;background:#1559B3;color:#fff;font-size:14.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;" style-hover="background:#0F4790;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"></rect><path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5"></path></svg>เพิ่มลงปฏิทิน</button>
-              <button onClick="{{ R.onShot }}" style="flex:1;min-width:150px;height:50px;border-radius:14px;border:1px solid #D6E0EC;background:#fff;color:#1559B3;font-size:14.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;" style-hover="background:#F3F7FC;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>บันทึกภาพหน้าจอ</button>
-            </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px;">
+            <button onClick="{{ R.onCal }}" style="height:54px;border-radius:16px;border:none;background:#1559B3;color:#fff;font-size:14.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 12px 26px rgba(21,89,179,.22);" style-hover="background:#0F4790;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"></rect><path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5"></path></svg>เพิ่มลงปฏิทิน</button>
+            <button onClick="{{ R.onShot }}" style="height:54px;border-radius:16px;border:1.5px solid #D6E0EC;background:#fff;color:#1559B3;font-size:14.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;" style-hover="background:#F3F7FC;border-color:#A9C6EC;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg>บันทึกภาพยืนยัน</button>
           </div>
         </sc-if>
         <sc-if value="{{ R.hasCi }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:#EEF4FC;border:1px solid #CFE0F5;font-size:13.5px;line-height:1.6;color:#0F1B2D;">
+          <div style="display:flex;gap:12px;align-items:flex-start;padding:16px;border-radius:18px;background:#EEF4FC;border:1px solid #CFE0F5;font-size:13.5px;line-height:1.6;color:#0F1B2D;">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#1559B3" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:2px;"><path d="M9 11l3 3 8-8"></path><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"></path></svg>
             <span><b>วันอบรม</b> เช็คชื่อด้วยรหัสพนักงานของท่าน + รหัสห้อง 4 หลักที่วิทยากรแสดงบนจอ ไม่ต้องจำเลขที่รับสมัคร</span>
           </div>
         </sc-if>
-        <div style="border-radius:18px;border:1px solid #E1E9F3;padding:18px 20px;display:flex;flex-direction:column;gap:2px;">
-          <div style="font-size:13px;font-weight:700;margin-bottom:10px;">ขั้นตอนถัดไป</div>
+        <div style="border-radius:20px;border:1px solid #E3EAF3;padding:18px 20px;display:flex;flex-direction:column;gap:2px;">
+          <div style="font-size:13px;font-weight:700;color:#8A97A8;margin-bottom:12px;">ขั้นตอนถัดไป</div>
           <sc-for list="{{ R.steps }}" as="s" hint-placeholder-count="3">
             <div style="display:flex;gap:12px;align-items:stretch;">
-              <div style="display:flex;flex-direction:column;align-items:center;width:22px;flex:none;">
-                <span style="width:22px;height:22px;border-radius:50%;background:{{ s.dotBg }};border:2px solid {{ s.dotBd }};color:{{ s.mFg }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none;">{{ s.mark }}</span>
+              <div style="display:flex;flex-direction:column;align-items:center;width:24px;flex:none;">
+                <span style="width:24px;height:24px;border-radius:50%;background:{{ s.dotBg }};border:2px solid {{ s.dotBd }};color:{{ s.mFg }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none;">{{ s.mark }}</span>
                 <span style="flex:1;width:2px;background:{{ s.line }};min-height:14px;"></span>
               </div>
-              <div style="padding-bottom:14px;display:flex;flex-direction:column;gap:1px;"><span style="font-size:14px;font-weight:600;color:{{ s.fg }};">{{ s.t }}</span><span style="font-size:12.5px;color:#5A6B85;">{{ s.d }}</span></div>
+              <div style="padding-bottom:16px;display:flex;flex-direction:column;gap:1px;"><span style="font-size:14px;font-weight:600;color:{{ s.fg }};">{{ s.t }}</span><span style="font-size:12.5px;color:#5A6B85;">{{ s.d }}</span></div>
             </div>
           </sc-for>
         </div>
@@ -294,50 +395,47 @@ button:not(:disabled){cursor:pointer}
 
       <!-- LOOKUP -->
       <sc-if value="{{ isLookup }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="04 My result lookup" style="display:flex;flex-direction:column;gap:20px;animation:riseIn .4s ease;">
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <div style="font-size:12.5px;font-weight:700;letter-spacing:2.6px;color:#1559B3;">MY REGISTRATION</div>
-          <div style="font-size:clamp(30px,4vw,40px);font-weight:700;line-height:1.15;">ดูผลการสมัครของฉัน</div>
-          <div style="font-size:14.5px;color:#5A6B85;line-height:1.6;">กรอกรหัสพนักงานและเบอร์โทรที่ใช้สมัคร เพื่อยืนยันว่าเป็นเจ้าของใบสมัคร</div>
+      <div data-screen-label="04 My result lookup" style="display:flex;flex-direction:column;gap:20px;animation:riseIn .45s cubic-bezier(.2,.7,.2,1);">
+        <button onClick="{{ goHome }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px 0 8px;border-radius:999px;border:1px solid #E3EAF3;background:#fff;color:#42526B;font-size:13px;font-weight:600;" style-hover="background:#F3F7FC;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>กลับหน้าแรก</button>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="font-size:clamp(28px,3.4vw,36px);font-weight:700;line-height:1.15;letter-spacing:-.5px;">ดูผลการสมัครของฉัน</div>
+          <div style="font-size:15px;color:#5A6B85;line-height:1.6;">กรอกรหัสพนักงานและเบอร์โทรที่ใช้สมัคร เพื่อยืนยันว่าเป็นเจ้าของใบสมัคร</div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:8px;"><label style="font-size:14px;font-weight:600;">รหัสพนักงาน</label>
+        <div style="display:flex;flex-direction:column;gap:8px;"><label style="font-size:13.5px;font-weight:600;color:#2B3645;">รหัสพนักงาน</label>
           <sc-if value="{{ K.hasExt }}" hint-placeholder-val="{{ false }}"><div style="font-size:12.5px;color:#5A6B85;margin-top:-4px;">บุคคลภายนอก: เว้นว่างช่องนี้ แล้วกรอกเบอร์โทรที่ใช้สมัคร</div></sc-if>
-          <input value="{{ K.emp }}" onChange="{{ K.onEmp }}" inputMode="numeric" maxLength="6" placeholder="ตัวเลข 4–6 หลัก" style="height:52px;border-radius:14px;border:1px solid #D6E0EC;padding:0 16px;font-size:16px;letter-spacing:2px;background:#fff;"></div>
-        <div style="display:flex;flex-direction:column;gap:8px;"><label style="font-size:14px;font-weight:600;">เบอร์โทรที่ใช้สมัคร</label>
-          <input value="{{ K.phone }}" onChange="{{ K.onPhone }}" onKeyDown="{{ K.onKey }}" type="tel" inputMode="numeric" maxLength="10" placeholder="0XXXXXXXXX" style="height:52px;border-radius:14px;border:1px solid #D6E0EC;padding:0 16px;font-size:16px;letter-spacing:1px;background:#fff;"></div>
-        <sc-if value="{{ K.hasErr }}" hint-placeholder-val="{{ false }}"><div style="padding:12px 16px;border-radius:14px;background:#FBE9EB;border:1px solid #F3C6CC;color:#7E1B28;font-size:14px;line-height:1.6;">{{ K.err }}</div></sc-if>
-        <button onClick="{{ K.onGo }}" disabled="{{ K.busy }}" style="height:56px;border-radius:14px;border:none;background:#1559B3;color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 12px 26px rgba(21,89,179,.22);">
+          <input value="{{ K.emp }}" onChange="{{ K.onEmp }}" inputMode="numeric" maxLength="6" placeholder="ตัวเลข 4–6 หลัก" style-focus="outline:none;border-color:#1559B3;box-shadow:0 0 0 4px rgba(21,89,179,.14);" style="height:58px;border-radius:16px;border:1.5px solid #D6E0EC;background:#fff;padding:0 18px;font-size:16px;min-width:0;width:100%;transition:border-color .2s ease,box-shadow .2s ease;letter-spacing:2px;font-variant-numeric:tabular-nums;"></div>
+        <div style="display:flex;flex-direction:column;gap:8px;"><label style="font-size:13.5px;font-weight:600;color:#2B3645;">เบอร์โทรที่ใช้สมัคร</label>
+          <input value="{{ K.phone }}" onChange="{{ K.onPhone }}" onKeyDown="{{ K.onKey }}" type="tel" inputMode="numeric" maxLength="10" placeholder="0XXXXXXXXX" style-focus="outline:none;border-color:#1559B3;box-shadow:0 0 0 4px rgba(21,89,179,.14);" style="height:58px;border-radius:16px;border:1.5px solid #D6E0EC;background:#fff;padding:0 18px;font-size:16px;min-width:0;width:100%;transition:border-color .2s ease,box-shadow .2s ease;letter-spacing:1px;font-variant-numeric:tabular-nums;"></div>
+        <sc-if value="{{ K.hasErr }}" hint-placeholder-val="{{ false }}"><div style="padding:14px 16px;border-radius:16px;background:#FBE9EB;border:1px solid #F3C6CC;color:#7E1B28;font-size:14px;line-height:1.6;">{{ K.err }}</div></sc-if>
+        <button onClick="{{ K.onGo }}" disabled="{{ K.busy }}" style="height:60px;border-radius:16px;border:none;background:#1559B3;color:#fff;font-size:16.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 14px 30px rgba(21,89,179,.25);" style-hover="background:#0F4790;">
           <sc-if value="{{ K.busy }}" hint-placeholder-val="{{ false }}"><span style="width:18px;height:18px;border-radius:50%;border:2.4px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .8s linear infinite;"></span></sc-if>ดูผลการสมัคร</button>
-        <button onClick="{{ goHome }}" style="align-self:flex-start;border:none;background:none;color:#1559B3;font-size:14px;font-weight:600;padding:4px 0;">← กลับหน้าแรก</button>
       </div>
       </sc-if>
 
-      <div style="margin-top:auto;padding-top:16px;border-top:1px solid #E6ECF3;display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;font-size:12.5px;color:#5A6B85;">
+      <div style="margin-top:auto;padding-top:18px;border-top:1px solid #EEF2F7;display:flex;gap:8px 14px;flex-wrap:wrap;justify-content:space-between;font-size:12px;color:#8A97A8;">
         <span>{{ coordText }}</span>
-        <span>กองฝึกอบรมภูมิภาค 2</span>
+        <span>กองฝึกอบรมภูมิภาค 2 · การประปาส่วนภูมิภาค · {{ cid }} © {{ year }}</span>
       </div>
     </div>
-  </div>
-  <div style="width:100%;max-width:1180px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:16px 8px 4px;font-size:11.5px;color:#8A97A8;letter-spacing:.5px;">
-    <span>กองพัฒนาทรัพยากรบุคคล การประปาส่วนภูมิภาค</span><span>{{ cid }} © {{ year }}</span>
-  </div>
-  </sc-if>
+  </main>
 </div>
+</sc-if>
 
 <sc-if value="{{ dlg }}" hint-placeholder-val="{{ false }}">
-  <div style="position:fixed;inset:0;z-index:50;background:rgba(15,27,45,.45);display:flex;align-items:center;justify-content:center;padding:20px;">
-    <div style="width:100%;max-width:400px;background:#fff;border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 30px 80px rgba(15,27,45,.3);animation:riseIn .25s ease;">
+  <div style="position:fixed;inset:0;z-index:50;background:rgba(11,27,50,.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;">
+    <div style="width:100%;max-width:420px;background:#fff;border-radius:24px;padding:26px;display:flex;flex-direction:column;gap:14px;box-shadow:0 30px 80px rgba(15,27,45,.3);animation:popIn .35s cubic-bezier(.2,1.1,.4,1);">
+      <span style="width:48px;height:48px;border-radius:16px;background:#FBE9EB;color:#B3283A;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9.5 17h-19z"></path><path d="M12 10v4M12 17h.01"></path></svg></span>
       <div style="font-size:20px;font-weight:700;">ยืนยันการสละสิทธิ์?</div>
       <div style="font-size:14px;color:#42526B;line-height:1.6;">ที่นั่ง/ลำดับของท่านจะถูกส่งต่อให้ผู้สมัครถัดไปทันที และไม่สามารถกู้คืนได้</div>
       <div style="display:flex;gap:10px;margin-top:6px;">
-        <button onClick="{{ dlgNo }}" style="flex:1;height:48px;border-radius:12px;border:1px solid #D6E0EC;background:#fff;font-size:14.5px;font-weight:600;">ยกเลิก</button>
-        <button onClick="{{ dlgYes }}" disabled="{{ dlgBusy }}" style="flex:1;height:48px;border-radius:12px;border:none;background:#B3283A;color:#fff;font-size:14.5px;font-weight:700;">สละสิทธิ์</button>
+        <button onClick="{{ dlgNo }}" style="flex:1;height:50px;border-radius:14px;border:1px solid #D6E0EC;background:#fff;font-size:14.5px;font-weight:600;">ยกเลิก</button>
+        <button onClick="{{ dlgYes }}" disabled="{{ dlgBusy }}" style="flex:1;height:50px;border-radius:14px;border:none;background:#B3283A;color:#fff;font-size:14.5px;font-weight:700;">สละสิทธิ์</button>
       </div>
     </div>
   </div>
 </sc-if>
 <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
-  <div style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:60;max-width:calc(100% - 32px);background:#0F1B2D;color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:0 12px 30px rgba(15,27,45,.3);animation:riseIn .25s ease;">{{ toast }}</div>
+  <div style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:60;max-width:calc(100% - 32px);background:rgba(15,27,45,.94);backdrop-filter:blur(8px);color:#fff;padding:13px 20px;border-radius:999px;font-size:14px;font-weight:600;box-shadow:0 14px 34px rgba(15,27,45,.3);animation:riseIn .25s ease;">{{ toast }}</div>
 </sc-if>
 </div>
 </x-dc>
@@ -352,21 +450,64 @@ class Component extends DCLogic {
   extOn(){const i=this.state.info;return !!i&&i.regions.some(g=>String(g.region)==='99');}
   startExt(){const g=this.state.info.regions.find(z=>String(z.region)==='99');this.setState({person:null,region:g||null,isExt:true,fe:{},saveErr:'',email:'',phone:'',pdpa:false,pf:'',pfText:'',fn:'',ln:'',org:'',xpos:''});this.go('form');}
   get N(){return window.NOM2;}
-  componentDidMount(){const files=['./nom2-config.js','./nom2-core.js'];
+  isMob(){try{return window.innerWidth<720;}catch(e){return false;}}
+  layout(){const m=!!this.state.mob;return m?{mob:true,desk:false,wrapPad:'0',cardRad:'0',cardPad:'0',cardSh:'none',cardGrid:'minmax(0,1fr)',cardGap:'0',cardMinH:'100vh',
+      heroMinH:'min(78vw,420px)',heroRad:'0 0 26px 26px',heroPad:'14px 18px 22px',heroGap:'8px',heroTop:'40px',barW:'40px',roundSize:'13.5px',subSize:'15.5px',tgSize:'13px',
+      colPad:'22px 18px 18px',colGap:'18px',h1:'24px',h2:'24px',lead:'14px',boxRad:'16px',boxPad:'14px 16px',cdLab:'15px',cd:'38px',bigNum:'64px',
+      ctaPos:'sticky',ctaM:'0 -18px',ctaP:'10px 18px calc(10px + env(safe-area-inset-bottom))',ctaBg:'rgba(255,255,255,.96)',ctaSh:'0 -8px 22px rgba(15,27,45,.08)',footPad:'14px 18px 22px'}
+    :{mob:false,desk:true,wrapPad:'clamp(10px,3vw,40px) clamp(10px,3vw,32px) 20px',cardRad:'28px',cardPad:'12px',cardSh:'0 30px 80px rgba(21,89,179,.10)',cardGrid:'repeat(auto-fit,minmax(min(100%,420px),1fr))',cardGap:'12px',cardMinH:'0',
+      heroMinH:'300px',heroRad:'20px',heroPad:'clamp(20px,3vw,40px)',heroGap:'12px',heroTop:'60px',barW:'56px',roundSize:'clamp(15px,1.6vw,19px)',subSize:'clamp(17px,1.9vw,22px)',tgSize:'14.5px',
+      colPad:'clamp(18px,4vw,52px) clamp(16px,4vw,52px) clamp(18px,3vw,32px)',colGap:'22px',h1:'clamp(32px,4vw,44px)',h2:'clamp(28px,3.4vw,36px)',lead:'14.5px',boxRad:'20px',boxPad:'18px 20px',cdLab:'18px',cd:'clamp(44px,6vw,60px)',bigNum:'clamp(64px,8vw,88px)',
+      ctaPos:'static',ctaM:'0',ctaP:'0',ctaBg:'transparent',ctaSh:'none',footPad:'16px 8px 4px'};}
+  componentDidMount(){this.setState({mob:this.isMob()});this.setState({wide:window.innerWidth>=960});this._rs=()=>{const w=window.innerWidth>=960;if(w!==!!this.state.wide)this.setState({wide:w});const m=this.isMob();if(m!==!!this.state.mob)this.setState({mob:m});};window.addEventListener('resize',this._rs);const files=['./nom2-config.js','./nom2-core.js'];
     const load=i=>{if(window.NOM2)return this.boot();if(i>=files.length)return;const sc=document.createElement('script');sc.src=files[i];sc.onload=()=>load(i+1);sc.onerror=()=>this.setState({boot:false,err:'โหลดระบบไม่สำเร็จ'});document.head.appendChild(sc);};
     load(window.NOM2_CONFIG?1:0);
     this.iv=setInterval(()=>{const s=this.state;this.setState({now:Date.now()});if(this.cid&&!s.saving&&(s.screen==='landing'||s.screen==='form')&&++this.tk%15===0)this.refresh();
       const o=s.info&&s.info.course&&s.info.course.openAt;if(s.info&&s.info.phase==='notyet'&&o&&Date.now()+s.off>=o&&!this._opening){this._opening=true;this.refresh().then(()=>{this._opening=false;});}},1000);this.tk=0;}
-  componentWillUnmount(){clearInterval(this.iv);clearTimeout(this.tt);}
+  componentWillUnmount(){window.removeEventListener('resize',this._rs);clearInterval(this.iv);clearTimeout(this.tt);}
   async boot(){const N=this.N;let cid=(new URL(location.href).searchParams.get('c')||'').toUpperCase();
-    if(!cid&&!N.LIVE){const r=await N.api('open');const x=r.ok&&r.courses.find(z=>z.course.type==='fcfs');if(x)cid=x.course.id;}
+    if(!cid){try{const r=await N.api('open');const x=r.ok&&r.courses.find(z=>z.course.type==='fcfs');if(x)cid=x.course.id;}catch(e){}}
+    if(!cid&&N.LIVE&&window.top!==window){const u=new URL(location.href);u.searchParams.set('mock','1');location.replace(u.toString());return;}
     if(!cid)return this.setState({boot:false,err:'ลิงก์ไม่ครบถ้วน กรุณาเปิดจากลิงก์ที่ได้รับจากกองฝึกอบรม'});
     this.cid=cid;await this.refresh();this.setState({boot:false});}
-  async refresh(){try{const r=await this.N.api('fcfsInfo',{c:this.cid});if(!r.ok)return this.setState({err:r.error||'ไม่พบหลักสูตร'});
+  async refresh(){if(this._rf)return;this._rf=true;this.setState({refreshing:true});try{await this._refresh();}finally{this._rf=false;this.setState({refreshing:false});}}
+  async _refresh(){try{const r=await this.N.api('fcfsInfo',{c:this.cid});if(!r.ok)return this.setState({err:r.error||'ไม่พบหลักสูตร'});
+      const pv=this.state.info;this._chg=this._chg||{};if(pv&&pv.regions)r.regions.forEach(g=>{const p=pv.regions.find(z=>z.region===g.region);if(p&&p.taken!==g.taken)this._chg[g.region]=Date.now();});this.tk=0;this.setState({upAt:Date.now()});
       this.setState(s=>({info:r,off:r.now-Date.now(),err:'',region:s.region?r.regions.find(g=>g.region===s.region.region)||s.region:null}));}
     catch(e){if(!this.state.info)this.setState({err:'เชื่อมต่อระบบไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'});}}
+  async shot(R,c){try{await (document.fonts&&document.fonts.ready);
+    const W=1080,P=72,cv=document.createElement('canvas'),x=cv.getContext('2d'),F="'IBM Plex Sans Thai','IBM Plex Sans',sans-serif";
+    const wrap=(t,mw)=>{const out=[];let ln='';const sg=window.Intl&&Intl.Segmenter?Array.from(new Intl.Segmenter('th',{granularity:'word'}).segment(String(t||'')),z=>z.segment):Array.from(String(t||''));for(const ch of sg){if(x.measureText(ln+ch).width>mw&&ln){out.push(ln);ln=ch;}else ln+=ch;}if(ln)out.push(ln);return out;};
+    x.font='700 44px '+F;const tl=wrap(c.title+(c.round?' รุ่นที่ '+c.round:''),W-P*2);
+    const rows=[['เลขที่รับสมัคร',R.ref],['เวลาที่ระบบบันทึก',R.at],['ผู้สมัคร',R.name],['สังกัด',R.region]].filter(z=>z[1]);
+    const H=P+60+tl.length*60+60+250+rows.length*108+20;cv.width=W;cv.height=H;
+    x.fillStyle='#F3F6FA';x.fillRect(0,0,W,H);x.fillStyle='#fff';x.beginPath();x.roundRect?x.roundRect(36,36,W-72,H-72,36):x.rect(36,36,W-72,H-72);x.fill();
+    let y=P+40;x.textBaseline='top';x.fillStyle='#5A6B85';x.font='500 28px '+F;x.fillText('ยืนยันการสมัครฝึกอบรม · กองฝึกอบรมภูมิภาค 2 กปภ.',P,y);y+=60;
+    x.fillStyle='#0F1B2D';x.font='700 44px '+F;tl.forEach(l=>{x.fillText(l,P,y);y+=60;});y+=30;
+    x.font='700 30px '+F;const bw=x.measureText(R.badge).width+48;x.fillStyle=R.bBg;x.beginPath();x.roundRect?x.roundRect(P,y,bw,56,28):x.rect(P,y,bw,56);x.fill();x.fillStyle=R.bFg;x.fillText(R.badge,P+24,y+11);y+=86;
+    if(R.num){x.fillStyle='#5A6B85';x.font='600 32px '+F;x.fillText(R.pre,P,y+50);const pw=x.measureText(R.pre).width+20;x.fillStyle='#1559B3';x.font='700 120px '+F;x.fillText(String(R.num),P+pw,y-20);const nw=x.measureText(String(R.num)).width;x.fillStyle='#5A6B85';x.font='600 36px '+F;x.fillText(R.unit||'',P+pw+nw+14,y+48);}
+    y+=150;x.strokeStyle='#E1E9F3';x.lineWidth=2;x.beginPath();x.moveTo(P,y);x.lineTo(W-P,y);x.stroke();y+=34;
+    rows.forEach(([k,v])=>{x.fillStyle='#5A6B85';x.font='500 26px '+F;x.fillText(k,P,y);x.fillStyle='#0F1B2D';x.font='700 34px '+F;x.fillText(wrap(v,W-P*2)[0]||'',P,y+36);y+=108;});
+    const blob=await new Promise(r=>cv.toBlob(r,'image/png'));const name='ยืนยันการสมัคร-'+(R.ref||'FCFS')+'.png';
+    const file=new File([blob],name,{type:'image/png'});const mob=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if(mob&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:name});return;}catch(e){if(e&&e.name==='AbortError')return;}}
+    const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);
+    this.say(mob?'บันทึกภาพแล้ว — ดูได้ในไฟล์ดาวน์โหลด/รูปภาพ':'ดาวน์โหลดภาพยืนยันการสมัครแล้ว');
+  }catch(e){this.say('บันทึกภาพไม่สำเร็จ กรุณาแคปหน้าจอแทน');}}
+  celebrate(){if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;try{navigator.vibrate&&navigator.vibrate([40,60,40]);}catch(e){}
+    if(this._cf)this._cf.remove();const cv=document.createElement('canvas');this._cf=cv;Object.assign(cv.style,{position:'fixed',left:'0',top:'0',width:'100vw',height:'100vh',pointerEvents:'none',zIndex:'999'});document.body.appendChild(cv);
+    const dpr=Math.min(2,window.devicePixelRatio||1),W=innerWidth,H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext('2d');x.scale(dpr,dpr);
+    const COL=['#1559B3','#2A79D6','#12805C','#1E9E6E','#E8930C','#F2C14E','#7FB2F0'],P=[],R=Math.random,n=W<640?60:100;
+    const mk=(px,py,a,v)=>({x:px,y:py,vx:Math.cos(a)*v,vy:Math.sin(a)*v,w:6+R()*6,h:9+R()*8,r:R()*6.3,vr:(R()-.5)*.35,c:COL[(R()*COL.length)|0],o:1,s:R()<.25});
+    for(let i=0;i<n;i++){P.push(mk(0,H*.85,(-58+(R()-.5)*50)*Math.PI/180,10+R()*10));P.push(mk(W,H*.85,(-122+(R()-.5)*50)*Math.PI/180,10+R()*10));}
+    setTimeout(()=>{for(let i=0;i<n;i++)P.push(mk(R()*W,-20-R()*80,Math.PI/2,2+R()*3));},420);
+    const t0=performance.now(),step=t=>{const el=t-t0;x.clearRect(0,0,W,H);
+      P.forEach(p=>{p.vy+=.25;p.vx*=.986;p.vy*=.986;p.x+=p.vx+Math.sin((el+p.r*300)/260)*.6;p.y+=p.vy;p.r+=p.vr;if(el>2800)p.o=Math.max(0,p.o-.018);
+        x.save();x.globalAlpha=p.o;x.translate(p.x,p.y);x.rotate(p.r);x.scale(1,Math.cos(p.r*1.7));x.fillStyle=p.c;if(p.s){x.beginPath();x.arc(0,0,p.w/2,0,6.3);x.fill();}else x.fillRect(-p.w/2,-p.h/2,p.w,p.h);x.restore();});
+      if(el<4600&&cv.isConnected)requestAnimationFrame(step);else{cv.remove();if(this._cf===cv)this._cf=null;}};
+    requestAnimationFrame(step);}
   say(t){clearTimeout(this.tt);this.setState({toast:t});this.tt=setTimeout(()=>this.setState({toast:''}),3400);}
-  go(k){this.setState({screen:k,empErr:'',dup:false,lkErr:'',saveErr:''});try{window.scrollTo(0,0);}catch(e){}}
+  go(k){if(k!=='result')this.setState({fresh:false});this.setState({screen:k,empErr:'',dup:false,lkErr:'',saveErr:''});try{window.scrollTo(0,0);}catch(e){}}
   async check(){const s=this.state,e=s.emp.trim();if(!/^\d{4,6}$/.test(e))return this.setState({empErr:'กรุณากรอกรหัสพนักงานเป็นตัวเลข 4–6 หลัก',dup:false});
     this.setState({checking:true,empErr:'',dup:false});
     try{const r=await this.N.api('fcfsCheck',{c:this.cid,code:e});
@@ -381,7 +522,7 @@ class Component extends DCLogic {
     try{const code=ext?'X'+s.phone:s.person.code;
       const r=await this.N.api('fcfsRegister',ext?{c:this.cid,ext:{prefix:pfx,first:s.fn.trim(),last:s.ln.trim(),org:s.org.trim(),pos:s.xpos.trim()},email:s.email,phone:s.phone}:{c:this.cid,code,email:s.email,phone:s.phone});
       if(!r.ok){this.setState({saving:false,saveErr:r.error||'บันทึกไม่สำเร็จ'});return;}
-      this.setState({saving:false,res:r.res,auth:{code,phone:s.phone}});this.go('result');if(r.dup)this.say(ext?'เบอร์นี้สมัครไว้แล้ว — แสดงลำดับเดิม':'รหัสนี้สมัครไว้แล้ว — แสดงลำดับเดิม');this.refresh();}
+      const win=r.res&&r.res.st==='seat'&&!r.dup;this.setState({saving:false,res:r.res,auth:{code,phone:s.phone},fresh:win});this.go('result');if(win)setTimeout(()=>this.celebrate(),380);if(r.dup)this.say(ext?'เบอร์นี้สมัครไว้แล้ว — แสดงลำดับเดิม':'รหัสนี้สมัครไว้แล้ว — แสดงลำดับเดิม');this.refresh();}
     catch(x){this.setState({saving:false,saveErr:'ไม่สามารถยืนยันผลการบันทึกได้'});}}
   async lookup(){const s=this.state,xo=this.extOn(),code=s.lkEmp||(xo?'X'+s.lkPhone:'');if(!/^0\d{9}$/.test(s.lkPhone)||(s.lkEmp?!/^\d{4,6}$/.test(s.lkEmp):!xo))return this.setState({lkErr:xo?'กรุณากรอกเบอร์โทร 10 หลัก (พนักงาน กปภ. กรอกรหัสพนักงาน 4–6 หลักด้วย)':'กรุณากรอกรหัสพนักงาน 4–6 หลัก และเบอร์โทร 10 หลัก'});
     this.setState({lkBusy:true,lkErr:''});
@@ -396,19 +537,38 @@ class Component extends DCLogic {
   ics(c){const t=['BEGIN:VCALENDAR','VERSION:2.0','BEGIN:VEVENT','SUMMARY:'+c.title+' รุ่นที่ '+c.round,'DTSTART:'+icsD(c.start),'DTEND:'+icsD(c.end||c.start),'LOCATION:'+this.N.placeText(c),'END:VEVENT','END:VCALENDAR'].join('\n');
     const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/calendar'}));a.download=c.id+'.ics';a.click();}
   regionVm(g){const left=g.seats-g.taken,full=left<=0,near=!full&&left<=Math.max(2,Math.ceil(g.seats*.15));
-    return {key:'g'+g.region,label:this.N.regionLabel(g.region),full,left,text:full?'เต็ม · สำรอง '+g.wait+' คน':'เหลือ '+left+' / '+g.seats+' ที่นั่ง',pct:Math.min(100,g.seats?g.taken/g.seats*100:0)+'%',
-      fg:full?'#B85C00':near?'#9A5B00':'#12805C',bar:full?'#B85C00':near?'#E8930C':'#1E9E6E'};}
-  renderVals(){const s=this.state,N=this.N,info=s.info;
-    const base={loading:s.boot,notFound:!s.boot&&!info,loadErr:s.err,ready:!s.boot&&!!info,showDemo:!!N&&!N.LIVE,demoCodes:N&&!N.LIVE?N.demoCodes.map(d=>({key:d.code,label:d.label+' · '+d.code,on:()=>this.setState({emp:d.code,lkEmp:d.code,empErr:'',dup:false})})):[],
+    return {flBg:(Date.now()-((this._chg||{})[g.region]||0))<2600?'#FFEBB8':'rgba(255,255,255,0)',key:'g'+g.region,label:this.N.regionLabel(g.region),full,left,text:full?'เต็ม · สำรอง '+g.wait+' คน':'เหลือ '+left+' / '+g.seats+' ที่นั่ง',pct:Math.min(100,g.seats?g.taken/g.seats*100:0)+'%',
+      big:full?'เต็ม':String(left),cap:full?'สำรอง '+g.wait+' คน':'ที่นั่งว่าง จาก '+g.seats,pctTxt:Math.round(Math.min(100,g.seats?g.taken/g.seats*100:100))+'%',ring:'conic-gradient('+(full?'#B85C00':near?'#E8930C':'#1E9E6E')+' '+Math.min(100,g.seats?g.taken/g.seats*100:100)+'%,#E8EEF6 0)',fg:full?'#B85C00':near?'#9A5B00':'#12805C',bar:full?'#B85C00':near?'#E8930C':'#1E9E6E'};}
+  renderVals(){const v=this._rv(),s=this.state,desk=!!s.wide,rg=(s.info&&s.info.regions)||[];
+    const tot=rg.reduce((t,g)=>t+(+g.seats||0),0),left=rg.reduce((t,g)=>t+Math.max(0,(+g.seats||0)-(+g.taken||0)),0),ph=s.info&&s.info.phase;
+    const cur=v.isLanding?1:v.isForm?2:v.isResult?3:0,nx=Math.max(0,15-((this.tk||0)%15)),col=(v.M&&v.M.dot)||'#1E9E6E';
+    v.Z={heroPos:desk?'sticky':'relative',heroH:desk?'100vh':'auto',heroMinH:desk?'100vh':'340px',heroPad:desk?'32px clamp(28px,4vw,56px) 40px':'18px 18px 52px',heroTop:desk?'40px':'56px',
+      mainMt:desk?'0':'-28px',mainRad:desk?'0':'28px 28px 0 0',mainMinH:desk?'100vh':'0',mainPad:desk?'44px clamp(24px,4vw,56px) 28px':'24px 18px 22px',
+      showLive:!!s.info&&ph!=='closed'&&tot>0,totText:(ph==='notyet'?tot:left)+' / '+tot,liveNote:ph==='notyet'?'ยังไม่เปิดรับ':'อัปเดตทุก 15 วิ',
+      syncRing:s.refreshing?'conic-gradient('+col+' 100%,#E4EBF4 0)':'conic-gradient('+col+' '+(nx/15*100)+'%,#E4EBF4 0)',
+      hasSteps:cur>0,steps:[['ยืนยันตัวตน'],['กรอกข้อมูล'],['ผลการสมัคร']].map(([l],i)=>{const n=i+1,d=n<cur,o=n===cur;return {key:'s'+n,label:l,mark:d?'✓':String(n),bg:d?'#12805C':o?'#1559B3':'#fff',bd:d?'#12805C':o?'#1559B3':'#D6E0EC',fg:d||o?'#fff':'#8A97A8',lc:o?'#0F1B2D':d?'#12805C':'#8A97A8',fw:o?'700':'600',hasLine:n<3,line:d?'#12805C':'#E3EAF3',flex:n<3?'1':'none'};})};
+    const wd=!!(s.res&&s.res.st==='withdrawn');if(v.R){v.R.isWd=wd;v.R.notWd=!wd;}
+    if(!this._tear){const N=40,d=[];let z=7;for(let i=0;i<=N;i++){z=(z*9301+49297)%233280;d.push(2+Math.round(z/233280*10));}
+      const top=['0 0','100% 0'].concat(d.map((q,i)=>(100-i/N*100).toFixed(2)+'% calc(100% - '+q+'px)').reverse().reverse()),
+        bot=d.map((q,i)=>(i/N*100).toFixed(2)+'% '+(12-q)+'px').concat(['100% 100%','0 100%']);
+      const tp=['0 0','100% 0'];for(let i=N;i>=0;i--)tp.push((i/N*100).toFixed(2)+'% calc(100% - '+d[i]+'px)');
+      this._tear={t:'polygon('+tp.join(',')+')',b:'polygon('+bot.join(',')+')'};}
+    v.Z.tearTop=this._tear.t;v.Z.tearBot=this._tear.b;
+    return v;}
+  _rv(){const s=this.state,N=this.N,info=s.info;
+    const base={Y:this.layout(),loading:s.boot,notFound:!s.boot&&!info,loadErr:s.err,ready:!s.boot&&!!info,showDemo:!!N&&!N.LIVE,demoCodes:N&&!N.LIVE?N.demoCodes.map(d=>({key:d.code,label:d.label+' · '+d.code,on:()=>this.setState({emp:d.code,lkEmp:d.code,empErr:'',dup:false})})):[],
       hasToast:!!s.toast,toast:s.toast,dlg:s.dlg,dlgBusy:s.dlgBusy,dlgNo:()=>this.setState({dlg:false}),dlgYes:()=>this.withdraw(),goLookup:()=>this.go('lookup'),goHome:()=>{this.setState({isExt:false,emp:'',person:null,region:null,email:'',phone:'',pdpa:false,fe:{},lkEmp:'',lkPhone:'',auth:null,res:null});this.go('landing');this.refresh();},year:new Date().getFullYear()};
     if(!info)return base;const c=info.course,ph=info.phase,now=s.now+s.off,regs=info.regions.map(g=>this.regionVm(g)),allFull=regs.length&&regs.every(g=>g.full);
     const k=ph==='notyet'?'notyet':ph==='closed'?'closed':allFull?'full':regs.some(g=>g.fg!=='#12805C')?'near':'open';
     const C={open:['#EEF8F3','#CBEBDB','#12805C','#1E9E6E','เปิดรับสมัคร'],near:['#FFF7E8','#F6DDAE','#9A5B00','#E8930C','ใกล้เต็ม'],full:['#FDF0E4','#F2CFAE','#B85C00','#B85C00','ที่นั่งเต็ม · รับสำรอง'],closed:['#F1F4F8','#DCE3EC','#5A6B85','#9AA7B8','ปิดรับสมัคร'],notyet:['#EEF4FC','#CFE0F5','#1559B3','#1559B3','ยังไม่เปิดรับ']}[k];
-    const asOf='อัปเดต '+hms(now);
-    Object.assign(base,{cid:c.id,title:c.title,round:c.round,target:c.target||'',hasTarget:!!c.target,dateText:N.fmtRange(c.start,c.end),dateChip:'อบรม '+N.fmtRange(c.start,c.end),placeChip:N.placeText(c),hasCover:!!c.cover,noCover:!c.cover,cover:c.cover||'',coverBg:c.cover?'url("'+c.cover+'")':'none',
+    const nxL=Math.max(0,15-((this.tk||0)%15)),asOf=s.upAt?(s.refreshing?'กำลังอัปเดต…':'อัปเดต '+hms(s.upAt)+' · อีก '+nxL+' วิ'):'';
+    Object.assign(base,{cid:c.id,title:c.title,round:c.round,courseNo:c.courseNo||'',hasCourseNo:!!c.courseNo,roundLine:(c.courseNo?'เลขที่หลักสูตร '+c.courseNo+' · ':'')+'รุ่นที่ '+c.round,
+      ...(()=>{const t=String(c.title||'').trim(),m=t.match(/^([A-Za-z0-9][A-Za-z0-9 .,:&'’+\/-]*?)\s+([\u0E00-\u0E7F].*)$/);let hd=m?m[1].trim():t,ac='';const sub=m?m[2].trim():'';
+        if(m){const w=hd.split(/\s+/);if(w.length>1){ac=w.pop();hd=w.join(' ');}}
+        const L=(hd+ac).length;return {tHead:hd,tAccent:ac,hasAccent:!!ac,tSub:sub,hasSub:!!sub,tSize:s.mob?(m?(L>24?'32px':'38px'):(t.length>60?'22px':'26px')):(m?(L>24?'clamp(34px,4vw,52px)':'clamp(40px,5vw,66px)'):(t.length>60?'clamp(24px,2.6vw,32px)':'clamp(28px,3.4vw,42px)'))};})(),target:c.target||'',hasTarget:!!c.target,dateText:N.fmtRange(c.start,c.end),dateChip:'อบรม '+N.fmtRange(c.start,c.end),placeChip:N.placeText(c),hasCover:!!c.cover,noCover:!c.cover,cover:c.cover||'',coverBg:c.cover?'url("'+c.cover+'")':'none',
       coordText:c.coord&&c.coord.name?'ผู้ประสานงาน: '+c.coord.name+(c.coord.phone?' · โทร '+c.coord.phone:''):'กองฝึกอบรมภูมิภาค 2 · การประปาส่วนภูมิภาค',asOf,
       isLanding:s.screen==='landing',isForm:s.screen==='form',isResult:s.screen==='result',isLookup:s.screen==='lookup',isClosed:ph==='closed',notClosed:ph!=='closed',dlText:N.fmtDT(c.deadline),
-      M:{bg:C[0],bd:C[1],fg:C[2],dot:C[3],label:C[4],sub:ph==='notyet'?'นับถอยหลังตามเวลาเซิร์ฟเวอร์':asOf+' · รีเฟรชอัตโนมัติ',isNotYet:ph==='notyet',cd:secs(((c.openAt||0)-now)/1000),openText:'เปิดรับ '+N.fmtDT(c.openAt||0),regions:regs},
+      M:{bg:C[0],bd:C[1],fg:C[2],dot:C[3],label:C[4],sub:ph==='notyet'?'นับถอยหลังตามเวลาเซิร์ฟเวอร์':'ที่นั่งอัปเดตอัตโนมัติทุก 15 วินาที',hasSync:ph!=='notyet'&&ph!=='closed'&&!!s.upAt,syncText:s.upAt?'อัปเดตล่าสุด '+hms(s.upAt)+' น.':'',nextText:s.refreshing?'กำลังอัปเดต…':'อัปเดตถัดไปใน '+nxL+' วินาที',nextPct:(s.refreshing?0:nxL/15*100)+'%',spin:s.refreshing?'spin .9s linear infinite':'none',busy:!!s.refreshing,onNow:()=>this.refresh(),isNotYet:ph==='notyet',cd:secs(((c.openAt||0)-now)/1000),openText:'เปิดรับ '+N.fmtDT(c.openAt||0),regions:regs},
       rules:[{t:'รับสมัคร '+(c.openAt?N.fmtDT(c.openAt):'ตั้งแต่บัดนี้')+' – '+N.fmtDT(c.deadline)+' หรือจนกว่าจะปิดรับ'},{t:'เปิดรับเฉพาะ '+info.regions.map(g=>N.regionLabel(g.region)+' ('+g.seats+' ที่นั่ง)').join(', ')},
         {t:'ลำดับนับตามเวลาที่ระบบบันทึกสำเร็จ ไม่ใช่เวลาที่กดปุ่ม · สังกัดใดเต็มแล้วรับเป็นรายชื่อสำรองของสังกัดนั้น'},{t:'1 รหัสพนักงาน สมัครได้ 1 ครั้งต่อรุ่น'+(this.extOn()?' (บุคคลภายนอก: 1 เบอร์มือถือ ต่อ 1 ใบสมัคร)':'')+' · ผลการสมัครแสดงบนหน้าจอทันที ตรวจสอบซ้ำได้ด้วยรหัสพนักงาน + เบอร์โทร'}]});
     const lock=ph!=='open';
@@ -438,7 +598,7 @@ class Component extends DCLogic {
       desc:wd?'สละสิทธิ์เมื่อ '+N.fmtDT(r.wdAt)+' — ที่นั่ง/ลำดับนี้ถูกส่งต่อให้ผู้สมัครถัดไปแล้ว':seat?'หน้านี้คือการแจ้งยืนยันการสมัคร — บันทึกภาพหน้าจอเก็บไว้เป็นหลักฐาน':'หากมีผู้สละสิทธิ์ ระบบจะเลื่อนลำดับให้อัตโนมัติ ตรวจสอบลำดับล่าสุดได้ที่ "ดูผล/ลำดับของฉัน"',
       ref:r.ref,at:r.at?N.fmtD(r.at)+' · '+hms(r.at)+' น.':'',name:r.name,region:N.regionLabel(r.region)+(r.org?' · '+r.org:''),mail:r.email,hasMoved:moved,movedFrom:'สำรอง ลำดับ '+fw[1],movedTo:'ลำดับที่ '+r.n+' / '+r.cap,hasCi:ci&&seat,canWd:!wd&&!dn&&!!s.auth,
       steps:[['สมัครสำเร็จ',r.at?N.fmtDT(r.at):''],['แจ้งยืนยันบนหน้าจอ','บันทึกภาพหน้าจอนี้ไว้'],['วันอบรม',N.fmtRange(c.start,c.end)+' · '+N.placeText(c)]].map(([t,d],i)=>{const done=!wd&&i<2;return {key:'s'+i,t,d,mark:done?'✓':String(i+1),mFg:done?'#fff':'#5A6B85',dotBg:done?'#12805C':'#fff',dotBd:done?'#12805C':'#CFD8E3',fg:wd&&i>0?'#8A97A8':'#0F1B2D',line:i===2?'transparent':'#E1E9F3'};}),
-      onCal:()=>this.ics(c),onShot:()=>this.say('กดปุ่มเปิด/ปิด + ลดเสียงพร้อมกัน เพื่อบันทึกภาพหน้าจอ'),onWd:()=>this.setState({dlg:true})};
+      celebrate:seat&&!!s.fresh,celeSub:'ได้ที่นั่งลำดับที่ '+r.n+' จาก '+r.cap+' ที่นั่ง · '+N.regionLabel(r.region)+' — แล้วพบกันในวันอบรม',onCele:()=>this.celebrate(),numAnim:seat&&s.fresh?'numPop .8s cubic-bezier(.2,1.3,.4,1) .25s both':'none',onCal:()=>this.ics(c),onShot:()=>this.shot(base.R,c),onWd:()=>this.setState({dlg:true})};
     base.K={hasExt:this.extOn(),emp:s.lkEmp,phone:s.lkPhone,onEmp:e=>this.setState({lkEmp:e.target.value.replace(/\D/g,'').slice(0,6),lkErr:''}),onPhone:e=>this.setState({lkPhone:e.target.value.replace(/\D/g,'').slice(0,10),lkErr:''}),
       onKey:e=>{if(e.key==='Enter')this.lookup();},hasErr:!!s.lkErr,err:s.lkErr,busy:s.lkBusy,onGo:()=>this.lookup()};
     return base;}

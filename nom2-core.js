@@ -313,6 +313,22 @@ const MOCK=(function(){
       if(had)return {ok:true,already:true,session:s.label,at:had.at};L.push({session:s.id,code,at:now});save(d);return {ok:true,session:s.label,at:now};},
     ciLive(x){const d=load();sessUser(d,x.token);return {ok:true,checkins:((d.cks||{})[String(x.c||'').toUpperCase()]||[])};},
     uploadCover(x){const d=load();sessUser(d,x.token);return {ok:true,url:'data:'+x.mime+';base64,'+x.data};},
+    adminEditReg(x){const d=load(),u=sessUser(d,x.token),c=C(d,x.c);if(!c||c.type!=='fcfs')return {ok:false,error:'ไม่พบหลักสูตร'};
+      if(!canEdit(u,c)&&(c.owners||[]).length)return {ok:false,error:'ไม่มีสิทธิ์แก้ไขหลักสูตรนี้'};
+      const L=(d.regs||{})[c.id]||[],m=L.find(r=>r.ref===x.ref);if(!m)return {ok:false,error:'ไม่พบใบสมัคร'};
+      const p=x.patch||{},ext=/^X/.test(m.code),T=s=>String(s==null?'':s).trim().replace(/\s+/g,' ');
+      const name=T(p.name),email=T(p.email),phone=String(p.phone||'').replace(/\D/g,'');
+      if(!name)return {ok:false,error:'กรุณากรอกชื่อ-นามสกุล'};if(!/^0\d{9}$/.test(phone))return {ok:false,error:'เบอร์โทรศัพท์ไม่ถูกต้อง'};if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))return {ok:false,error:'E-mail ไม่ถูกต้อง'};
+      let code=m.code,uid=m.uid,region=m.region;
+      if(ext)code='X'+phone;else{code=normCode(p.code);if(code!==m.code){const e=empOf(code);if(!e)return {ok:false,error:'ไม่พบรหัสพนักงาน '+code+' ในฐานข้อมูล'};
+        if(fcfsRegions(c).indexOf(String(e.region))<0)return {ok:false,error:'รหัส '+code+' สังกัด '+regionLabel(e.region)+' ซึ่งไม่อยู่ในเขตที่เปิดรับ'};uid=e.uid;region=e.region;}}
+      if(m.status!=='withdrawn'&&L.some(r=>r!==m&&r.code===code&&r.status!=='withdrawn'))return {ok:false,error:'รหัสนี้มีใบสมัครที่ยังมีผลอยู่แล้ว'};
+      const nv={code,name,phone,email,org:ext?T(p.org):m.org||'',pos:ext?T(p.pos):m.pos||''},LB={code:'รหัส',name:'ชื่อ',phone:'เบอร์',email:'E-mail',org:'หน่วยงาน',pos:'ตำแหน่ง'};
+      const ch=Object.keys(nv).filter(k=>String(nv[k])!==String(m[k]||'')&&!(ext&&k==='code')).map(k=>LB[k]+' '+(m[k]||'—')+' → '+(nv[k]||'—'));
+      if(!ch.length)return {ok:true,changed:0};
+      Object.assign(m,nv,{uid,region});d.logs[c.id]=d.logs[c.id]||[];
+      d.logs[c.id].unshift({at:Date.now(),uid:'',who:u.name,whoId:u.email,role:u.role==='admin'?'ผู้ดูแลระบบ':'เจ้าหน้าที่',action:'แก้ไขข้อมูลผู้สมัคร',detail:m.ref+' · '+ch.join(' · ')});
+      save(d);return {ok:true,changed:ch.length};},
     export(x){const d=load();sessUser(d,x.token);const c=C(d,x.c);if(!c)return {ok:false,error:'ไม่พบหลักสูตร'};const t=exportTable(c,d.entries[c.id]||[],d.subs[c.id]||{},empOf,unitOf);return {ok:true,url:'',cols:t.cols,rows:t.rows};}
   };
   return {A,reset(){const d=seed();save(d);},empOf};

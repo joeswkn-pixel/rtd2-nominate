@@ -1707,9 +1707,12 @@ class Component extends DCLogic {
       submitLabel:f.busy?'กำลังส่ง…':'ยืนยันการส่ง',onSubmit:()=>this.submit(),onBack:()=>{if(dirty&&!ro&&!window.confirm('มีการแก้ไขที่ยังไม่ได้ส่ง ต้องการออกจากหน้านี้หรือไม่?'))return;this.goGate();}});}
   grpVals(g){const qr=(g&&g.qr)||'',lk=(g&&g.link)||'';return {hasGroup:!!(qr||lk),hasGroupQr:!!qr,groupQr:qr,hasGroupLink:!!lk,groupLink:lk};}
   onGroupFile(ev){const file=ev.target.files&&ev.target.files[0];ev.target.value='';if(!file)return;if(!/^image\//.test(file.type))return this.toast('กรุณาเลือกไฟล์รูปภาพ','err');
-    const rd=new FileReader();rd.onload=()=>{const img=new Image();img.onload=()=>{let out='';
+    const rd=new FileReader();rd.onload=()=>{const img=new Image();img.onload=async()=>{let out='';
       const LIM=40000,mk=(sz,bw)=>{const k=Math.min(1,sz/Math.max(img.width,img.height)),w=Math.round(img.width*k),hh=Math.round(img.height*k),cv=document.createElement('canvas');cv.width=w;cv.height=hh;const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,hh);x.imageSmoothingEnabled=!bw;x.drawImage(img,0,0,w,hh);
           if(bw){const d=x.getImageData(0,0,w,hh),p=d.data;for(let i=0;i<p.length;i+=4){const v=(p[i]*.3+p[i+1]*.59+p[i+2]*.11)<140?0:255;p[i]=p[i+1]=p[i+2]=v;p[i+3]=255;}x.putImageData(d,0,0);}return cv;};
+        if(this.N.LIVE){const cv=mk(640,false);let u=cv.toDataURL('image/png');if(u.length>2e6)u=cv.toDataURL('image/jpeg',.92);const mime=u.slice(5,u.indexOf(';'));
+          this.toast('กำลังอัปโหลด QR Code…');const r=await this.N.api('uploadCover',{token:this.state.sess.token,name:'group-qr.'+(mime==='image/png'?'png':'jpg'),mime,data:u.split(',')[1]});if(!this.chk(r))return;
+          if(!r.ok)return this.toast(r.error||'อัปโหลดไม่สำเร็จ','err');this.setFf({groupQr:r.url});return this.toast('แนบ QR Code แล้ว — กดบันทึกหลักสูตรเพื่อใช้งาน');}
         outer:for(const sz of [480,400,340]){const cv=mk(sz,false);out=cv.toDataURL('image/png');if(out.length<=LIM)break;
           for(const q of [.85,.75,.65,.55]){out=cv.toDataURL('image/jpeg',q);if(out.length<=LIM)break outer;}}
         if(out.length>LIM)for(const sz of [480,400,320,260]){out=mk(sz,true).toDataURL('image/png');if(out.length<=LIM)break;}

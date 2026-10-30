@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="./nom2-config.js"></script>
+<style>body{margin:0;background:#F3F6FA;font-family:'IBM Plex Sans Thai',sans-serif;color:#0F1B2D}a{color:#1559B3}a:hover{color:#0F3F80}*{box-sizing:border-box}</style>
+</helmet>
+<div style="max-width:980px;margin:0 auto;padding:clamp(16px,4vw,40px) clamp(12px,3vw,28px) 60px;display:flex;flex-direction:column;gap:18px">
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <div style="font-size:13px;font-weight:600;color:#1559B3;letter-spacing:.04em">เครื่องมือผู้ดูแล · ทดสอบก่อนเปิดรับจริง</div>
+    <div style="font-size:clamp(26px,3.4vw,34px);font-weight:700">ทดสอบรับคนเข้าพร้อมกัน</div>
+    <div style="font-size:14.5px;color:#5A6B85;max-width:720px;text-wrap:pretty">จำลองคนเข้าระบบสมัครแบบใครก่อนได้ก่อนพร้อมกันหลายร้อยคน โดยใช้การลองส่งใหม่และการเว้นช่วงแบบเดียวกับหน้าสมัครจริง</div>
+  </div>
+
+  <div style="background:#FFF7E8;border:1px solid #F2D49B;border-radius:16px;padding:14px 18px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.6">
+    <div style="font-weight:700;color:#8A5300">ต้องใช้หลักสูตรทดสอบเท่านั้น ห้ามใช้หลักสูตร AI Prompt mastery</div>
+    <div>1. หน้าผู้ดูแล › สร้างหลักสูตรใหม่ แบบที่ 3 (สมัครด้วยตนเอง) · สถานะเปิดรับ · เวลาเปิดรับ = ตอนนี้ · กำหนดที่นั่ง <b>บุคคลภายนอก</b> เช่น 50 ที่ (ใช้สำหรับขั้นที่ 3)</div>
+    <div>2. ใส่รหัสหลักสูตรทดสอบ และรหัสพนักงานจริง 1 คน (ใช้ทดสอบการค้นรหัส ระบบแค่อ่าน ไม่บันทึก)</div>
+    <div>3. ทดสอบเสร็จแล้ว ให้ลบหลักสูตรทดสอบ ข้อมูลผู้สมัครปลอมจะถูกลบไปด้วย</div>
+  </div>
+
+  <div style="background:#fff;border-radius:20px;padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:14px;box-shadow:0 10px 30px rgba(21,89,179,.06)">
+    <label style="display:flex;flex-direction:column;gap:6px;grid-column:1/-1;font-size:13px;font-weight:600;color:#5A6B85">URL ของ Apps Script (/exec)
+      <input value="{{ url }}" onChange="{{ setUrl }}" style="font:500 13px 'IBM Plex Mono',monospace;padding:10px 12px;border:1px solid #CBD7E6;border-radius:10px;color:#0F1B2D;min-width:0"></label>
+    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:#5A6B85">รหัสหลักสูตรทดสอบ
+      <input value="{{ cid }}" onChange="{{ setCid }}" placeholder="เช่น TEST-01" style="font:600 15px 'IBM Plex Sans Thai',sans-serif;padding:10px 12px;border:1px solid #CBD7E6;border-radius:10px;text-transform:uppercase;min-width:0"></label>
+    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:#5A6B85">รหัสพนักงานตัวอย่าง
+      <input value="{{ code }}" onChange="{{ setCode }}" inputmode="numeric" placeholder="4–6 หลัก" style="font:600 15px 'IBM Plex Sans Thai',sans-serif;padding:10px 12px;border:1px solid #CBD7E6;border-radius:10px;min-width:0"></label>
+    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:#5A6B85">จำนวนคนจำลอง
+      <input type="number" value="{{ n }}" onChange="{{ setN }}" min="10" max="500" style="font:600 15px 'IBM Plex Sans Thai',sans-serif;padding:10px 12px;border:1px solid #CBD7E6;border-radius:10px;min-width:0"></label>
+    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:#5A6B85">ทยอยเข้าภายใน (วินาที)
+      <input type="number" value="{{ spread }}" onChange="{{ setSpread }}" min="0" max="60" style="font:600 15px 'IBM Plex Sans Thai',sans-serif;padding:10px 12px;border:1px solid #CBD7E6;border-radius:10px;min-width:0"></label>
+    <div style="grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+      <sc-for list="{{ phaseToggles }}" as="t" hint-placeholder-count="3">
+        <button onClick="{{ t.toggle }}" style="display:flex;gap:8px;align-items:center;padding:8px 14px;border-radius:999px;border:1px solid {{ t.bd }};background:{{ t.bg }};color:{{ t.fg }};font:600 13.5px 'IBM Plex Sans Thai',sans-serif;cursor:pointer">{{ t.mark }} {{ t.label }}</button>
+      </sc-for>
+      <div style="flex:1"></div>
+      <sc-if value="{{ running }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ stop }}" style="padding:12px 22px;border-radius:12px;border:0;background:#C23B3B;color:#fff;font:700 15px 'IBM Plex Sans Thai',sans-serif;cursor:pointer">หยุด</button>
+      </sc-if>
+      <sc-if value="{{ idle }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ start }}" style="padding:12px 22px;border-radius:12px;border:0;background:#1559B3;color:#fff;font:700 15px 'IBM Plex Sans Thai',sans-serif;cursor:pointer" style-hover="background:#0F4A99">เริ่มทดสอบ</button>
+      </sc-if>
+    </div>
+    <sc-if value="{{ formErr }}" hint-placeholder-val="{{ false }}">
+      <div style="grid-column:1/-1;color:#C23B3B;font-size:14px;font-weight:600">{{ formErr }}</div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{ verdict }}" hint-placeholder-val="{{ false }}">
+    <div style="border-radius:16px;padding:16px 20px;background:{{ verdictBg }};color:{{ verdictFg }};font-size:16px;font-weight:700;line-height:1.5">{{ verdict }}</div>
+  </sc-if>
+
+  <sc-for list="{{ phases }}" as="p" hint-placeholder-count="3">
+    <div style="background:#fff;border-radius:20px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 10px 30px rgba(21,89,179,.06);opacity:{{ p.op }}">
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <div style="font-size:18px;font-weight:700">{{ p.title }}</div>
+          <div style="font-size:13px;color:#5A6B85">{{ p.desc }}</div>
+        </div>
+        <div style="font-size:13px;font-weight:700;padding:4px 12px;border-radius:999px;background:{{ p.stBg }};color:{{ p.stFg }}">{{ p.status }}</div>
+      </div>
+      <div style="height:10px;border-radius:99px;background:#E9EFF7;overflow:hidden;display:flex">
+        <div style="width:{{ p.okW }};background:#12805C;transition:width .2s"></div>
+        <div style="width:{{ p.failW }};background:#C23B3B;transition:width .2s"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px">
+        <sc-for list="{{ p.stats }}" as="s" hint-placeholder-count="6">
+          <div style="background:#F6F9FC;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px">
+            <div style="font-size:12px;color:#5A6B85;font-weight:600">{{ s.k }}</div>
+            <div style="font-size:20px;font-weight:700;color:{{ s.c }}">{{ s.v }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <sc-for list="{{ p.errs }}" as="e" hint-placeholder-count="0">
+        <div style="font-size:13px;color:#8A2525;background:#FDF0F0;border-radius:10px;padding:8px 12px;word-break:break-word">{{ e }}</div>
+      </sc-for>
+      <sc-if value="{{ p.extra }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:14px;color:#0F1B2D;font-weight:600">{{ p.extra }}</div>
+      </sc-if>
+    </div>
+  </sc-for>
+
+  <div style="font-size:13px;color:#5A6B85;line-height:1.6;text-wrap:pretty">หมายเหตุ: เบราว์เซอร์เครื่องเดียวส่งคำขอพร้อมกันได้จำกัด ผลที่ได้จึงใกล้เคียงสถานการณ์จริงแต่อาจเบากว่าเล็กน้อย ถ้าอยากทดสอบหนักขึ้น ให้เปิดหน้านี้ 2–3 เครื่องแล้วกดเริ่มพร้อมกัน (ใส่หลักสูตรเดียวกันได้ เบอร์โทรจำลองสุ่มไม่ซ้ำกัน)</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const PH=[
+  {k:'info',title:'1 · เปิดหน้าสมัครตอน 8.30 น.',desc:'ทุกคนดึงสถานะที่นั่งพร้อมกัน (fcfsInfo)',max:4},
+  {k:'check',title:'2 · กรอกรหัสพนักงาน',desc:'ทุกคนค้นรหัสพนักงานพร้อมกัน (fcfsCheck) ใช้ทดสอบข้อมูลพนักงานที่ระบบจำไว้',max:5},
+  {k:'reg',title:'3 · กดยืนยันสมัคร',desc:'ทุกคนบันทึกการสมัครพร้อมกัน (fcfsRegister) ในฐานะบุคคลภายนอกปลอม',max:9}];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const pct=(a,q)=>{if(!a.length)return 0;const s=a.slice().sort((x,y)=>x-y);return s[Math.min(s.length-1,Math.floor(q*s.length))];};
+const sec=ms=>ms?(ms/1000).toFixed(1)+' วิ':'–';
+class Component extends DCLogic {
+  state={url:(window.NOM2_CONFIG&&window.NOM2_CONFIG.API_URL)||'',cid:'',code:'',n:300,spread:2,on:{info:true,check:true,reg:true},running:false,formErr:'',tick:0};
+  R={};
+  componentDidMount(){if(!this.state.url&&window.NOM2_CONFIG)this.setState({url:window.NOM2_CONFIG.API_URL||''});}
+  componentWillUnmount(){clearInterval(this.iv);this.abort=true;}
+  async one(action,data,max){const t0=performance.now();let tries=0;
+    for(;;){tries++;if(this.abort)return{ok:false,err:'หยุดโดยผู้ทดสอบ',tries,ms:performance.now()-t0};
+      try{const res=await fetch(this.state.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action},data)),redirect:'follow'});
+        const r=await res.json();
+        if(r&&r.busy&&tries<max){await sleep(Math.min(7000,1200*Math.pow(1.6,tries-1))+Math.random()*1500);continue;}
+        return{ok:!!r.ok,r,err:r.ok?'':(r.error||'ไม่สำเร็จ'),tries,ms:performance.now()-t0};}
+      catch(e){if(tries>=max)return{ok:false,err:'เชื่อมต่อไม่สำเร็จ: '+String(e&&e.message||e),tries,ms:performance.now()-t0};
+        await sleep(Math.min(7000,1200*Math.pow(1.6,tries-1))+Math.random()*1500);}}}
+  async runPhase(ph,mk){const n=this.state.n,sp=this.state.spread*1000,R=this.R[ph.k]={st:'run',done:0,ok:0,fail:0,retried:0,ms:[],errs:{},t0:Date.now(),wall:0,res:[]};
+    await Promise.all(Array.from({length:n},async(_,i)=>{await sleep(Math.random()*sp);const x=await this.one(ph.k==='info'?'fcfsInfo':ph.k==='check'?'fcfsCheck':'fcfsRegister',mk(i),ph.max);
+      R.done++;R.ms.push(x.ms);if(x.tries>1)R.retried++;if(x.ok){R.ok++;R.res.push(x.r);}else{R.fail++;R.errs[x.err]=(R.errs[x.err]||0)+1;}}));
+    R.wall=Date.now()-R.t0;R.st=this.abort?'stop':'done';}
+  async start(){const s=this.state,cid=s.cid.trim().toUpperCase();
+    if(!/^https:\/\/script\.google\.com\/.+\/exec/.test(s.url.trim()))return this.setState({formErr:'กรุณาใส่ URL /exec ของ Apps Script'});
+    if(!cid)return this.setState({formErr:'กรุณาใส่รหัสหลักสูตรทดสอบ'});
+    if(s.on.check&&!/^\d{4,6}$/.test(s.code.trim()))return this.setState({formErr:'กรุณาใส่รหัสพนักงานตัวอย่าง 4–6 หลัก (หรือปิดขั้นที่ 2)'});
+    if(!Object.values(s.on).some(Boolean))return this.setState({formErr:'เลือกอย่างน้อย 1 ขั้น'});
+    this.setState({formErr:''});
+    const pre=await this.one('fcfsInfo',{c:cid},2);
+    if(!pre.ok)return this.setState({formErr:'เปิดหลักสูตร '+cid+' ไม่ได้: '+pre.err});
+    const t=(pre.r.course&&pre.r.course.title)||'';
+    if(/prompt|mastery/i.test(t))return this.setState({formErr:'หลักสูตรนี้ดูเหมือนเป็นหลักสูตรจริง ('+t+') — กรุณาใช้หลักสูตรทดสอบ'});
+    if(s.on.reg){if(pre.r.phase!=='open')return this.setState({formErr:'หลักสูตรทดสอบยังไม่อยู่ในสถานะเปิดรับ (ตอนนี้: '+pre.r.phase+')'});
+      if(!pre.r.regions.some(g=>g.region===99))return this.setState({formErr:'หลักสูตรทดสอบยังไม่ได้เปิดที่นั่ง "บุคคลภายนอก" — จำเป็นสำหรับขั้นที่ 3'});
+      if(!window.confirm('จะบันทึกผู้สมัครปลอม '+s.n+' รายการลงหลักสูตร "'+t+'" ('+cid+') — ยืนยัน?'))return;}
+    this.abort=false;this.R={};this.setState({running:true});this.iv=setInterval(()=>this.setState(z=>({tick:z.tick+1})),250);
+    const run=String(Math.floor(Math.random()*90)+10),code=s.code.trim();
+    try{
+      if(s.on.info&&!this.abort)await this.runPhase(PH[0],()=>({c:cid}));
+      if(s.on.check&&!this.abort)await this.runPhase(PH[1],()=>({c:cid,code}));
+      if(s.on.reg&&!this.abort)await this.runPhase(PH[2],i=>({c:cid,ext:{prefix:'นาย',first:'ทดสอบ',last:'โหลด'+run+'-'+(i+1),org:'LOADTEST',pos:''},email:'lt'+run+'_'+(i+1)+'@test.local',phone:'09'+run+String(i+1).padStart(6,'0')}));
+    }finally{clearInterval(this.iv);this.setState({running:false});}}
+  verdict(){const R=this.R,ks=PH.filter(p=>R[p.k]&&R[p.k].st!=='run');if(this.state.running||!ks.length)return null;
+    const fail=ks.reduce((a,p)=>a+R[p.k].fail,0),tot=ks.reduce((a,p)=>a+R[p.k].done,0),rg=R.reg;
+    const dupRef=rg?rg.res.length-new Set(rg.res.map(r=>r.res&&r.res.ref)).size:0;
+    if(dupRef)return{t:'พบเลขที่รับสมัครซ้ำ '+dupRef+' รายการ — แจ้งผู้พัฒนาก่อนเปิดใช้จริง',bg:'#FDF0F0',fg:'#8A2525'};
+    if(!fail)return{t:'ผ่าน — ทุกคำขอสำเร็จครบ '+tot+' รายการ'+(rg?' · สมัครสูงสุดใช้เวลา '+sec(Math.max(...rg.ms)):''),bg:'#E4F6EC',fg:'#0B5C41'};
+    const r=fail/tot;return r<.02?{t:'เกือบผ่าน — ล้มเหลว '+fail+' จาก '+tot+' รายการ (ต่ำกว่า 2%) ดูสาเหตุที่การ์ดด้านล่าง',bg:'#FFF7E8',fg:'#8A5300'}
+      :{t:'ยังไม่ผ่าน — ล้มเหลว '+fail+' จาก '+tot+' รายการ ('+Math.round(r*100)+'%) ดูสาเหตุที่การ์ดด้านล่าง',bg:'#FDF0F0',fg:'#8A2525'};}
+  renderVals(){const s=this.state,n=s.n,R=this.R,v=this.verdict();
+    const phases=PH.map(p=>{const r=R[p.k],on=s.on[p.k];
+      const st=!on?['ข้าม','#EEF2F7','#5A6B85']:!r?['รอ','#EEF2F7','#5A6B85']:r.st==='run'?['กำลังทดสอบ '+r.done+'/'+n,'#EAF0FF','#1E5AA8']:r.st==='stop'?['หยุดแล้ว','#FFF7E8','#8A5300']:r.fail?['ล้มเหลว '+r.fail,'#FDF0F0','#8A2525']:['ผ่าน','#E4F6EC','#0B5C41'];
+      let extra='';if(r&&p.k==='reg'&&r.res.length){const seat=r.res.filter(x=>x.res&&x.res.st==='seat').length,dup=r.res.filter(x=>x.dup).length,refs=new Set(r.res.map(x=>x.res&&x.res.ref)).size;
+        extra='ได้ที่นั่ง '+seat+' · สำรอง '+(r.res.length-seat)+' · เลขที่รับสมัครไม่ซ้ำ '+refs+'/'+r.res.length+(dup?' · ตรวจพบส่งซ้ำ (ระบบคืนลำดับเดิม) '+dup:'');}
+      return{title:p.title,desc:p.desc,op:on?'1':'.5',status:st[0],stBg:st[1],stFg:st[2],
+        okW:r?(r.ok/n*100)+'%':'0%',failW:r?(r.fail/n*100)+'%':'0%',
+        stats:[{k:'สำเร็จ',v:r?r.ok:'–',c:'#12805C'},{k:'ล้มเหลว',v:r?r.fail:'–',c:r&&r.fail?'#C23B3B':'#0F1B2D'},{k:'ต้องลองส่งใหม่',v:r?r.retried:'–',c:'#0F1B2D'},
+          {k:'ปกติ (p50)',v:r?sec(pct(r.ms,.5)):'–',c:'#0F1B2D'},{k:'ช้า (p95)',v:r?sec(pct(r.ms,.95)):'–',c:'#0F1B2D'},{k:'ช้าสุด',v:r&&r.ms.length?sec(Math.max(...r.ms)):'–',c:'#0F1B2D'},
+          {k:'ใช้เวลาทั้งขั้น',v:r?sec(r.wall||Date.now()-r.t0):'–',c:'#0F1B2D'}],
+        errs:r?Object.entries(r.errs).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([m,c])=>c+'× '+m):[],extra};});
+    const tg=k=>()=>this.setState(z=>({on:Object.assign({},z.on,{[k]:!z.on[k]})}));
+    return{url:s.url,cid:s.cid,code:s.code,n:s.n,spread:s.spread,running:s.running,idle:!s.running,formErr:s.formErr,
+      setUrl:e=>this.setState({url:e.target.value}),setCid:e=>this.setState({cid:e.target.value}),setCode:e=>this.setState({code:e.target.value.replace(/\D/g,'')}),
+      setN:e=>this.setState({n:Math.max(1,Math.min(500,+e.target.value||0))}),setSpread:e=>this.setState({spread:Math.max(0,Math.min(60,+e.target.value||0))}),
+      phaseToggles:PH.map(p=>({label:p.title.split(' · ')[1],mark:s.on[p.k]?'✓':'○',bg:s.on[p.k]?'#EAF0FF':'#fff',fg:s.on[p.k]?'#1559B3':'#5A6B85',bd:s.on[p.k]?'#9DBBE6':'#CBD7E6',toggle:tg(p.k)})),
+      start:()=>this.start(),stop:()=>{this.abort=true;},phases,
+      verdict:v?v.t:'',verdictBg:v?v.bg:'#fff',verdictFg:v?v.fg:'#0F1B2D'};}
+}
+</script>
+</body>
+</html>

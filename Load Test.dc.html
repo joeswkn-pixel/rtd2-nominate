@@ -15,7 +15,7 @@
 </helmet>
 <div style="max-width:980px;margin:0 auto;padding:clamp(16px,4vw,40px) clamp(12px,3vw,28px) 60px;display:flex;flex-direction:column;gap:18px">
   <div style="display:flex;flex-direction:column;gap:6px">
-    <div style="font-size:13px;font-weight:600;color:#1559B3;letter-spacing:.04em">เครื่องมือผู้ดูแล · ทดสอบก่อนเปิดรับจริง · หน้าทดสอบ v3</div>
+    <div style="font-size:13px;font-weight:600;color:#1559B3;letter-spacing:.04em">เครื่องมือผู้ดูแล · ทดสอบก่อนเปิดรับจริง · หน้าทดสอบ v4</div>
     <div style="font-size:clamp(26px,3.4vw,34px);font-weight:700">ทดสอบรับคนเข้าพร้อมกัน</div>
     <div style="font-size:14.5px;color:#5A6B85;max-width:720px;text-wrap:pretty">จำลองคนเข้าระบบสมัครแบบใครก่อนได้ก่อนพร้อมกันหลายร้อยคน โดยใช้การลองส่งใหม่และการเว้นช่วงแบบเดียวกับหน้าสมัครจริง</div>
   </div>
@@ -36,7 +36,9 @@
       <input value="{{ code }}" onChange="{{ setCode }}" inputmode="numeric" placeholder="4–6 หลัก" style="font:600 15px 'IBM Plex Sans Thai',sans-serif;padding:10px 12px;border:1px solid #CBD7E6;border-radius:10px;min-width:0"></label>
     <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:#5A6B85">จำนวนคนจำลอง
       <input type="number" value="{{ n }}" onChange="{{ setN }}" min="10" max="500" style="font:600 15px 'IBM Plex Sans Thai',sans-serif;padding:10px 12px;border:1px solid #CBD7E6;border-radius:10px;min-width:0"></label>
-    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:#5A6B85">ทยอยเข้าภายใน (วินาที)
+    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:#5A6B85">ขั้นกดสมัคร ทยอยภายใน (วินาที)
+      <input type="number" value="{{ regSpread }}" onChange="{{ setRegSpread }}" min="0" max="180" style="font:600 15px 'IBM Plex Sans Thai',sans-serif;padding:10px 12px;border:1px solid #CBD7E6;border-radius:10px;min-width:0"></label>
+    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:#5A6B85">ขั้น 1–2 ทยอยภายใน (วินาที)
       <input type="number" value="{{ spread }}" onChange="{{ setSpread }}" min="0" max="60" style="font:600 15px 'IBM Plex Sans Thai',sans-serif;padding:10px 12px;border:1px solid #CBD7E6;border-radius:10px;min-width:0"></label>
     <div style="grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
       <sc-for list="{{ phaseToggles }}" as="t" hint-placeholder-count="3">
@@ -96,12 +98,12 @@
 const PH=[
   {k:'info',title:'1 · เปิดหน้าสมัครตอน 8.30 น.',desc:'ทุกคนดึงสถานะที่นั่งพร้อมกัน (fcfsInfo)',max:4},
   {k:'check',title:'2 · กรอกรหัสพนักงาน',desc:'ทุกคนค้นรหัสพนักงานพร้อมกัน (fcfsCheck) ใช้ทดสอบข้อมูลพนักงานที่ระบบจำไว้ · ถ้าหลักสูตรรับเฉพาะบุคคลภายนอก ระบบจะตอบว่า "ไม่อยู่ในกลุ่มที่เปิดรับ" ซึ่งนับว่าผ่าน (ค้นรหัสสำเร็จ)',max:5},
-  {k:'reg',title:'3 · กดยืนยันสมัคร',desc:'ทุกคนบันทึกการสมัครพร้อมกัน (fcfsRegister) ในฐานะบุคคลภายนอกปลอม',max:9}];
+  {k:'reg',title:'3 · กดยืนยันสมัคร',desc:'ทุกคนบันทึกการสมัครพร้อมกัน (fcfsRegister) ในฐานะบุคคลภายนอกปลอม',max:14}];
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const pct=(a,q)=>{if(!a.length)return 0;const s=a.slice().sort((x,y)=>x-y);return s[Math.min(s.length-1,Math.floor(q*s.length))];};
 const sec=ms=>ms?(ms/1000).toFixed(1)+' วิ':'–';
 class Component extends DCLogic {
-  state={url:(window.NOM2_CONFIG&&window.NOM2_CONFIG.API_URL)||'',cid:'',code:'',n:300,spread:2,on:{info:true,check:true,reg:true},running:false,formErr:'',tick:0};
+  state={url:(window.NOM2_CONFIG&&window.NOM2_CONFIG.API_URL)||'',cid:'',code:'',n:300,spread:2,regSpread:30,on:{info:true,check:true,reg:true},running:false,formErr:'',tick:0};
   R={};
   componentDidMount(){if(!this.state.url&&window.NOM2_CONFIG)this.setState({url:window.NOM2_CONFIG.API_URL||''});}
   componentWillUnmount(){clearInterval(this.iv);this.abort=true;}
@@ -109,11 +111,11 @@ class Component extends DCLogic {
     for(;;){tries++;if(this.abort)return{ok:false,err:'หยุดโดยผู้ทดสอบ',tries,ms:performance.now()-t0};
       try{const res=await fetch(this.state.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action},data)),redirect:'follow'});
         const r=await res.json();
-        if(r&&r.busy&&tries<max){await sleep(Math.min(7000,1200*Math.pow(1.6,tries-1))+Math.random()*1500);continue;}
+        if(r&&r.busy&&tries<max){await sleep(Math.min(8000,1200*Math.pow(1.6,tries-1))+Math.random()*2000);continue;}
         const ok=!!r.ok||!!r.notEligible;return{ok,r,err:ok?'':(r.error||'ไม่สำเร็จ'),tries,ms:performance.now()-t0};}
       catch(e){if(tries>=max)return{ok:false,err:'เชื่อมต่อไม่สำเร็จ: '+String(e&&e.message||e),tries,ms:performance.now()-t0};
-        await sleep(Math.min(7000,1200*Math.pow(1.6,tries-1))+Math.random()*1500);}}}
-  async runPhase(ph,mk){const n=this.state.n,sp=this.state.spread*1000,R=this.R[ph.k]={st:'run',done:0,ok:0,fail:0,retried:0,ms:[],errs:{},t0:Date.now(),wall:0,res:[]};
+        await sleep(Math.min(8000,1200*Math.pow(1.6,tries-1))+Math.random()*2000);}}}
+  async runPhase(ph,mk){const n=this.state.n,sp=(ph.k==='reg'?this.state.regSpread:this.state.spread)*1000,R=this.R[ph.k]={st:'run',done:0,ok:0,fail:0,retried:0,ms:[],errs:{},t0:Date.now(),wall:0,res:[]};
     await Promise.all(Array.from({length:n},async(_,i)=>{await sleep(Math.random()*sp);const x=await this.one(ph.k==='info'?'fcfsInfo':ph.k==='check'?'fcfsCheck':'fcfsRegister',mk(i),ph.max);
       R.done++;R.ms.push(x.ms);if(x.tries>1)R.retried++;if(x.ok){R.ok++;R.res.push(x.r);}else{R.fail++;R.errs[x.err]=(R.errs[x.err]||0)+1;}}));
     R.wall=Date.now()-R.t0;R.st=this.abort?'stop':'done';}
@@ -124,7 +126,7 @@ class Component extends DCLogic {
     if(!Object.values(s.on).some(Boolean))return this.setState({formErr:'เลือกอย่างน้อย 1 ขั้น'});
     this.setState({formErr:''});
     const vv=await this.one('ver',{},2);
-    if(!vv.ok||vv.r.ver!=='rush-3')return this.setState({formErr:'Apps Script ที่ใช้งานจริงยังเป็นเวอร์ชันเก่า'+(vv.r&&vv.r.ver?' ('+vv.r.ver+')':'')+' — ไปที่ Deploy › Manage deployments › ✏️ Edit › Version: New version › Deploy แล้วลองใหม่'});
+    if(!vv.ok||vv.r.ver!=='rush-4')return this.setState({formErr:'Apps Script ที่ใช้งานจริงยังเป็นเวอร์ชันเก่า'+(vv.r&&vv.r.ver?' ('+vv.r.ver+')':'')+' — ไปที่ Deploy › Manage deployments › ✏️ Edit › Version: New version › Deploy แล้วลองใหม่'});
     const pre=await this.one('fcfsInfo',{c:cid},2);
     if(!pre.ok)return this.setState({formErr:'เปิดหลักสูตร '+cid+' ไม่ได้: '+pre.err});
     const t=(pre.r.course&&pre.r.course.title)||'';
@@ -160,7 +162,7 @@ class Component extends DCLogic {
     const tg=k=>()=>this.setState(z=>({on:Object.assign({},z.on,{[k]:!z.on[k]})}));
     return{url:s.url,cid:s.cid,code:s.code,n:s.n,spread:s.spread,running:s.running,idle:!s.running,formErr:s.formErr,
       setUrl:e=>this.setState({url:e.target.value}),setCid:e=>this.setState({cid:e.target.value}),setCode:e=>this.setState({code:e.target.value.replace(/\D/g,'')}),
-      setN:e=>this.setState({n:Math.max(1,Math.min(500,+e.target.value||0))}),setSpread:e=>this.setState({spread:Math.max(0,Math.min(60,+e.target.value||0))}),
+      setN:e=>this.setState({n:Math.max(1,Math.min(500,+e.target.value||0))}),setSpread:e=>this.setState({spread:Math.max(0,Math.min(60,+e.target.value||0))}),regSpread:s.regSpread,setRegSpread:e=>this.setState({regSpread:Math.max(0,Math.min(180,+e.target.value||0))}),
       phaseToggles:PH.map(p=>({label:p.title.split(' · ')[1],mark:s.on[p.k]?'✓':'○',bg:s.on[p.k]?'#EAF0FF':'#fff',fg:s.on[p.k]?'#1559B3':'#5A6B85',bd:s.on[p.k]?'#9DBBE6':'#CBD7E6',toggle:tg(p.k)})),
       start:()=>this.start(),stop:()=>{this.abort=true;},phases,
       verdict:v?v.t:'',verdictBg:v?v.bg:'#fff',verdictFg:v?v.fg:'#0F1B2D'};}

@@ -3,12 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ลงทะเบียนเข้ารับการฝึกอบรม · กฝภ.2 กปภ.</title>
-<meta name="description" content="ลงทะเบียนเข้ารับการฝึกอบรมออนไลน์ · ใครลงก่อนได้ก่อน ที่นั่งมีจำนวนจำกัด">
-<meta property="og:type" content="website">
-<meta property="og:title" content="ลงทะเบียนเข้ารับการฝึกอบรม · กฝภ.2 กปภ.">
-<meta property="og:description" content="ลงทะเบียนเข้ารับการฝึกอบรมออนไลน์ · ใครลงก่อนได้ก่อน ที่นั่งมีจำนวนจำกัด">
-<meta property="og:site_name" content="กองฝึกอบรมภูมิภาค 2">
 <script src="./support.js"></script>
 </head>
 <body>
@@ -477,7 +471,7 @@ class Component extends DCLogic {
     if(!cid)return this.setState({boot:false,err:'ลิงก์ไม่ครบถ้วน กรุณาเปิดจากลิงก์ที่ได้รับจากกองฝึกอบรม'});
     this.cid=cid;await this.refresh();this.setState({boot:false});}
   async call(a,d,n){for(let i=0;;i++){try{const r=await this.N.api(a,d);if(r&&r.busy&&i<n-1){await this.backoff(i);continue;}return r;}catch(e){if(i>=n-1)throw e;await this.backoff(i);}}}
-  backoff(i){if(i===0)this.say('มีผู้ใช้งานพร้อมกันจำนวนมาก — ระบบกำลังต่อคิวให้อัตโนมัติ กรุณาอย่าปิดหน้านี้');return new Promise(r=>setTimeout(r,Math.min(7000,1200*Math.pow(1.6,i))+Math.random()*1500));}
+  backoff(i){if(i===0)this.say('มีผู้ใช้งานพร้อมกันจำนวนมาก — ระบบกำลังต่อคิวให้อัตโนมัติ กรุณาอย่าปิดหน้านี้');return new Promise(r=>setTimeout(r,Math.min(8000,1200*Math.pow(1.6,i))+Math.random()*2000));}
   async refresh(){if(this._rf)return;this._rf=true;this.setState({refreshing:true});try{await this._refresh();}finally{this._rf=false;this.setState({refreshing:false});}}
   async _refresh(){try{const r=await this.call('fcfsInfo',{c:this.cid},this.state.info?1:4);if(!r.ok)return this.setState({err:r.error||'ไม่พบหลักสูตร'});
       const pv=this.state.info;this._chg=this._chg||{};if(pv&&pv.regions)r.regions.forEach(g=>{const p=pv.regions.find(z=>z.region===g.region);if(p&&p.taken!==g.taken)this._chg[g.region]=Date.now();});this.tk=0;this.setState({upAt:Date.now()});
@@ -528,7 +522,7 @@ class Component extends DCLogic {
     if(Object.values(fe).some(Boolean))return this.setState({fe});
     this.setState({fe:{},saving:true,saveErr:''});
     try{const code=ext?'X'+s.phone:s.person.code;
-      const r=await this.call('fcfsRegister',ext?{c:this.cid,ext:{prefix:pfx,first:s.fn.trim(),last:s.ln.trim(),org:s.org.trim(),pos:s.xpos.trim()},email:s.email,phone:s.phone}:{c:this.cid,code,email:s.email,phone:s.phone},9);
+      const r=await this.call('fcfsRegister',ext?{c:this.cid,ext:{prefix:pfx,first:s.fn.trim(),last:s.ln.trim(),org:s.org.trim(),pos:s.xpos.trim()},email:s.email,phone:s.phone}:{c:this.cid,code,email:s.email,phone:s.phone},14);
       if(!r.ok){this.setState({saving:false,saveErr:r.error||'บันทึกไม่สำเร็จ'});return;}
       const win=r.res&&r.res.st==='seat'&&!r.dup;this.setState({saving:false,res:r.res,auth:{code,phone:s.phone},fresh:win});this.go('result');if(win)setTimeout(()=>this.celebrate(),380);if(r.dup)this.say(ext?'เบอร์นี้สมัครไว้แล้ว — แสดงลำดับเดิม':'รหัสนี้สมัครไว้แล้ว — แสดงลำดับเดิม');this.refresh();}
     catch(x){this.setState({saving:false,saveErr:'ไม่สามารถยืนยันผลการบันทึกได้'});}}

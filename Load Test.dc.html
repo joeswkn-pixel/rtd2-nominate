@@ -95,7 +95,7 @@
 <script type="text/x-dc" data-dc-script>
 const PH=[
   {k:'info',title:'1 · เปิดหน้าสมัครตอน 8.30 น.',desc:'ทุกคนดึงสถานะที่นั่งพร้อมกัน (fcfsInfo)',max:4},
-  {k:'check',title:'2 · กรอกรหัสพนักงาน',desc:'ทุกคนค้นรหัสพนักงานพร้อมกัน (fcfsCheck) ใช้ทดสอบข้อมูลพนักงานที่ระบบจำไว้',max:5},
+  {k:'check',title:'2 · กรอกรหัสพนักงาน',desc:'ทุกคนค้นรหัสพนักงานพร้อมกัน (fcfsCheck) ใช้ทดสอบข้อมูลพนักงานที่ระบบจำไว้ · ถ้าหลักสูตรรับเฉพาะบุคคลภายนอก ระบบจะตอบว่า "ไม่อยู่ในกลุ่มที่เปิดรับ" ซึ่งนับว่าผ่าน (ค้นรหัสสำเร็จ)',max:5},
   {k:'reg',title:'3 · กดยืนยันสมัคร',desc:'ทุกคนบันทึกการสมัครพร้อมกัน (fcfsRegister) ในฐานะบุคคลภายนอกปลอม',max:9}];
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const pct=(a,q)=>{if(!a.length)return 0;const s=a.slice().sort((x,y)=>x-y);return s[Math.min(s.length-1,Math.floor(q*s.length))];};
@@ -110,7 +110,7 @@ class Component extends DCLogic {
       try{const res=await fetch(this.state.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action},data)),redirect:'follow'});
         const r=await res.json();
         if(r&&r.busy&&tries<max){await sleep(Math.min(7000,1200*Math.pow(1.6,tries-1))+Math.random()*1500);continue;}
-        return{ok:!!r.ok,r,err:r.ok?'':(r.error||'ไม่สำเร็จ'),tries,ms:performance.now()-t0};}
+        const ok=!!r.ok||!!r.notEligible;return{ok,r,err:ok?'':(r.error||'ไม่สำเร็จ'),tries,ms:performance.now()-t0};}
       catch(e){if(tries>=max)return{ok:false,err:'เชื่อมต่อไม่สำเร็จ: '+String(e&&e.message||e),tries,ms:performance.now()-t0};
         await sleep(Math.min(7000,1200*Math.pow(1.6,tries-1))+Math.random()*1500);}}}
   async runPhase(ph,mk){const n=this.state.n,sp=this.state.spread*1000,R=this.R[ph.k]={st:'run',done:0,ok:0,fail:0,retried:0,ms:[],errs:{},t0:Date.now(),wall:0,res:[]};

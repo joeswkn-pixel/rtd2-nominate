@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ลงทะเบียนเข้ารับการฝึกอบรม · กฝภ.2 กปภ.</title>
+<meta name="description" content="ลงทะเบียนเข้ารับการฝึกอบรมออนไลน์ · ใครลงก่อนได้ก่อน ที่นั่งมีจำนวนจำกัด">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ลงทะเบียนเข้ารับการฝึกอบรม · กฝภ.2 กปภ.">
+<meta property="og:description" content="ลงทะเบียนเข้ารับการฝึกอบรมออนไลน์ · ใครลงก่อนได้ก่อน ที่นั่งมีจำนวนจำกัด">
+<meta property="og:site_name" content="กองฝึกอบรมภูมิภาค 2">
 <script src="./support.js"></script>
 </head>
 <body>
@@ -32,6 +38,7 @@ button:not(:disabled){cursor:pointer}
 @keyframes tearTop{0%{transform:none}55%{transform:rotate(-3.4deg) translate(-8px,-6px)}100%{transform:rotate(-2.4deg) translate(-6px,-4px)}}
 @keyframes tearBot{0%{transform:none}55%{transform:rotate(2.6deg) translate(10px,14px)}100%{transform:rotate(1.8deg) translate(8px,11px)}}
 @keyframes stampIn{0%{opacity:0;transform:scale(2.2) rotate(-12deg)}100%{opacity:.9;transform:rotate(-12deg)}}
+@keyframes eq{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
 @keyframes drift{0%{transform:translate(0,0)}50%{transform:translate(18px,-14px)}100%{transform:translate(0,0)}}
 @media print{[data-noprint]{display:none!important}}
 </style>
@@ -42,6 +49,7 @@ button:not(:disabled){cursor:pointer}
   <div data-noprint="" style="background:#FFF4DC;color:#7A4F00;padding:7px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;font-size:12px;font-weight:600;">
     <span>โหมดทดลอง · รหัสตัวอย่าง</span>
     <sc-for list="{{ demoCodes }}" as="d" hint-placeholder-count="4"><button onClick="{{ d.on }}" style="height:28px;padding:0 10px;border-radius:999px;border:1px solid #E7C77E;background:#fff;color:#7A4F00;font-size:12px;font-weight:600;">{{ d.label }}</button></sc-for>
+    <button onClick="{{ simOpen }}" style="height:28px;padding:0 10px;border-radius:999px;border:1px solid #7A4F00;background:#7A4F00;color:#fff;font-size:12px;font-weight:600;">จำลองนับถอยหลัง 10 วิ</button>
   </div>
 </sc-if>
 
@@ -134,6 +142,15 @@ button:not(:disabled){cursor:pointer}
               <span style="font-size:13px;font-weight:600;color:#5A6B85;">เปิดรับสมัครใน</span>
               <span style="font-size:clamp(34px,5vw,48px);font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-1px;color:#1559B3;">{{ M.cd }}</span>
               <span style="font-size:12.5px;color:#5A6B85;">{{ M.openText }} · ช่องกรอกจะเปิดให้อัตโนมัติ</span>
+              <sc-if value="{{ Mu.showArm }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ Mu.onArm }}" style="margin-top:8px;display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;border:1px solid {{ Mu.armBd }};background:{{ Mu.armBg }};color:{{ Mu.armFg }};text-align:left;transition:background .3s ease,border-color .3s ease;">
+                  <span style="width:34px;height:34px;border-radius:50%;flex:none;background:#fff;border:1px solid {{ Mu.armBd }};display:flex;align-items:center;justify-content:center;">
+                    <sc-if value="{{ Mu.armOn }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4z"></path><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"></path></svg></sc-if>
+                    <sc-if value="{{ Mu.armOff }}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4z"></path><path d="M16 9l5 6M21 9l-5 6"></path></svg></sc-if>
+                  </span>
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;"><span style="font-size:14px;font-weight:700;">{{ Mu.armLabel }}</span><span style="font-size:12px;color:#5A6B85;line-height:1.45;">{{ Mu.armSub }}</span></span>
+                </button>
+              </sc-if>
             </div>
           </sc-if>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px;">
@@ -155,7 +172,8 @@ button:not(:disabled){cursor:pointer}
         <sc-if value="{{ isClosed }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:6px;padding:18px 20px;border-radius:20px;background:#F1F4F8;border:1px solid #DCE3EC;">
             <div style="font-size:16px;font-weight:700;">ปิดรับสมัครแล้ว</div>
-            <div style="font-size:13.5px;color:#42526B;line-height:1.6;">ปิดรับเมื่อ {{ dlText }} ผู้สมัครยังตรวจสอบผลและลำดับได้ตามปกติ</div>
+            <sc-if value="{{ closedAuto }}" hint-placeholder-val="{{ false }}"><div style="font-size:13.5px;color:#42526B;line-height:1.6;">ปิดรับเมื่อ {{ dlText }} ผู้สมัครยังตรวจสอบผลและลำดับได้ตามปกติ</div></sc-if>
+            <sc-if value="{{ closedManual }}" hint-placeholder-val="{{ false }}"><div style="font-size:13.5px;color:#42526B;line-height:1.6;">ผู้สมัครยังตรวจสอบผลและลำดับได้ตามปกติ</div></sc-if>
           </div>
           <button onClick="{{ goLookup }}" style="height:58px;border-radius:16px;border:none;background:#1559B3;color:#fff;font-size:16px;font-weight:700;box-shadow:0 14px 30px rgba(21,89,179,.25);" style-hover="background:#0F4790;">ดูผล/ลำดับของฉัน</button>
         </sc-if>
@@ -434,6 +452,15 @@ button:not(:disabled){cursor:pointer}
     </div>
   </div>
 </sc-if>
+<sc-if value="{{ Mu.showPill }}" hint-placeholder-val="{{ false }}">
+  <button data-noprint="" onClick="{{ Mu.onPill }}" title="{{ Mu.pillTitle }}" style="position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:40;display:flex;align-items:center;gap:10px;height:46px;padding:0 16px 0 8px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(11,42,91,.92);backdrop-filter:blur(10px);color:#fff;font-size:13px;font-weight:700;box-shadow:0 12px 30px rgba(11,42,91,.3);animation:riseIn .4s ease;">
+    <span style="width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;gap:2px;">
+      <sc-if value="{{ Mu.playing }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:2px;height:14px;"><span style="width:3px;height:14px;border-radius:2px;background:#8FD3FF;transform-origin:center;animation:eq .9s ease-in-out infinite;"></span><span style="width:3px;height:14px;border-radius:2px;background:#8FD3FF;transform-origin:center;animation:eq .9s ease-in-out .3s infinite;"></span><span style="width:3px;height:14px;border-radius:2px;background:#8FD3FF;transform-origin:center;animation:eq .9s ease-in-out .15s infinite;"></span></span></sc-if>
+      <sc-if value="{{ Mu.notPlaying }}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M7 4.5v15l12-7.5z"></path></svg></sc-if>
+    </span>
+    <span>{{ Mu.pillLabel }}</span>
+  </button>
+</sc-if>
 <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:60;max-width:calc(100% - 32px);background:rgba(15,27,45,.94);backdrop-filter:blur(8px);color:#fff;padding:13px 20px;border-radius:999px;font-size:14px;font-weight:600;box-shadow:0 14px 34px rgba(15,27,45,.3);animation:riseIn .25s ease;">{{ toast }}</div>
 </sc-if>
@@ -446,7 +473,7 @@ const hms=ms=>{const d=new Date(ms);return pad(d.getHours())+':'+pad(d.getMinute
 const icsD=ms=>new Date(ms).toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
 
 class Component extends DCLogic {
-  state={boot:true,err:'',info:null,off:0,now:Date.now(),screen:'landing',emp:'',empErr:'',dup:false,checking:false,person:null,region:null,email:'',phone:'',pdpa:false,fe:{},saving:false,saveErr:'',res:null,auth:null,dlg:false,dlgBusy:false,lkEmp:'',lkPhone:'',lkErr:'',lkBusy:false,toast:'',mode:'',isExt:false,pf:'',pfText:'',fn:'',ln:'',org:'',xpos:''};
+  state={boot:true,err:'',info:null,off:0,now:Date.now(),screen:'landing',emp:'',empErr:'',dup:false,checking:false,person:null,region:null,email:'',phone:'',pdpa:false,fe:{},saving:false,saveErr:'',res:null,auth:null,dlg:false,dlgBusy:false,lkEmp:'',lkPhone:'',lkErr:'',lkBusy:false,toast:'',mode:'',mArm:false,mMute:false,mOn:false,mStarted:false,isExt:false,pf:'',pfText:'',fn:'',ln:'',org:'',xpos:''};
   extOn(){const i=this.state.info;return !!i&&i.regions.some(g=>String(g.region)==='99');}
   startExt(){const g=this.state.info.regions.find(z=>String(z.region)==='99');this.setState({person:null,region:g||null,isExt:true,fe:{},saveErr:'',email:'',phone:'',pdpa:false,pf:'',pfText:'',fn:'',ln:'',org:'',xpos:''});this.go('form');}
   get N(){return window.NOM2;}
@@ -459,21 +486,32 @@ class Component extends DCLogic {
       heroMinH:'300px',heroRad:'20px',heroPad:'clamp(20px,3vw,40px)',heroGap:'12px',heroTop:'60px',barW:'56px',roundSize:'clamp(15px,1.6vw,19px)',subSize:'clamp(17px,1.9vw,22px)',tgSize:'14.5px',
       colPad:'clamp(18px,4vw,52px) clamp(16px,4vw,52px) clamp(18px,3vw,32px)',colGap:'22px',h1:'clamp(32px,4vw,44px)',h2:'clamp(28px,3.4vw,36px)',lead:'14.5px',boxRad:'20px',boxPad:'18px 20px',cdLab:'18px',cd:'clamp(44px,6vw,60px)',bigNum:'clamp(64px,8vw,88px)',
       ctaPos:'static',ctaM:'0',ctaP:'0',ctaBg:'transparent',ctaSh:'none',footPad:'16px 8px 4px'};}
-  componentDidMount(){this.setState({mob:this.isMob()});this.setState({wide:window.innerWidth>=960});this._rs=()=>{const w=window.innerWidth>=960;if(w!==!!this.state.wide)this.setState({wide:w});const m=this.isMob();if(m!==!!this.state.mob)this.setState({mob:m});};window.addEventListener('resize',this._rs);const files=['./nom2-config.js','./nom2-core.js'];
+  audio(){const c=this.state.info&&this.state.info.course,src=c&&c.music&&this.N?this.N.audioSrc(c.music):'';if(!src)return null;
+    if(!this._au||this._auSrc!==src){if(this._au)this._au.pause();const a=new Audio();a.src=src;a.loop=true;a.preload='auto';a.onended=()=>this.setState({mOn:false});this._au=a;this._auSrc=src;}return this._au;}
+  arm(){const a=this.audio();if(!a){return;}this.setState({mArm:true});if(this._armed)return;this._armed=true;a.muted=true;
+    try{const p=a.play();Promise.resolve(p).then(()=>{if(!this._live){a.pause();try{a.currentTime=0;}catch(e){}}a.muted=false;}).catch(()=>{a.muted=false;this._armed=false;});}catch(e){a.muted=false;this._armed=false;}}
+  startMusic(){const a=this.audio();this.setState({mStarted:true});if(!a||this.state.mMute)return;this._live=true;a.muted=false;try{a.currentTime=0;}catch(e){}a.volume=0;clearInterval(this._fade);
+    Promise.resolve(a.play()).then(()=>{this.setState({mOn:true});let v=0;this._fade=setInterval(()=>{v=Math.min(.85,v+.05);try{a.volume=v;}catch(e){}if(v>=.85)clearInterval(this._fade);},110);})
+      .catch(()=>{a.volume=.85;this._pend=true;});}
+  toggleMusic(){const a=this.audio();if(!a)return;clearInterval(this._fade);if(this.state.mOn){a.pause();this.setState({mOn:false});return;}
+    this._live=true;a.muted=false;a.volume=.85;Promise.resolve(a.play()).then(()=>this.setState({mOn:true,mStarted:true,mMute:false})).catch(()=>this.say('เล่นเพลงไม่สำเร็จ กรุณาลองอีกครั้ง'));}
+  simOpen(){if(this._au){this._au.pause();}this._live=false;this._fired=false;const s=this.state;if(!s.info)return;this._sim=Date.now()+s.off+10000;
+    this.setState({mOn:false,mStarted:false,screen:'landing',info:Object.assign({},s.info,{phase:'notyet',course:Object.assign({},s.info.course,{openAt:this._sim})})});}
+  componentDidMount(){this._g=()=>{const i=this.state.info;if(!i||!i.course||!i.course.music||this.state.mMute)return;if(i.phase==='notyet')this.arm();else if(i.phase==='open'&&this._pend){this._pend=false;this.startMusic();}};['click','touchend','keydown'].forEach(ev=>document.addEventListener(ev,this._g,true));this.setState({mob:this.isMob()});this.setState({wide:window.innerWidth>=960});this._rs=()=>{const w=window.innerWidth>=960;if(w!==!!this.state.wide)this.setState({wide:w});const m=this.isMob();if(m!==!!this.state.mob)this.setState({mob:m});};window.addEventListener('resize',this._rs);const files=['./nom2-config.js','./nom2-core.js'];
     const load=i=>{if(window.NOM2)return this.boot();if(i>=files.length)return;const sc=document.createElement('script');sc.src=files[i];sc.onload=()=>load(i+1);sc.onerror=()=>this.setState({boot:false,err:'โหลดระบบไม่สำเร็จ'});document.head.appendChild(sc);};
     load(window.NOM2_CONFIG?1:0);
     this.iv=setInterval(()=>{const s=this.state;this.setState({now:Date.now()});if(this.cid&&!s.saving&&(s.screen==='landing'||s.screen==='form')&&++this.tk>=(this.pv||(this.pv=25+Math.floor(Math.random()*11))))this.refresh();
-      const o=s.info&&s.info.course&&s.info.course.openAt;if(s.info&&s.info.phase==='notyet'&&o&&Date.now()+s.off>=o&&!this._opening){this._opening=true;setTimeout(()=>this.refresh().then(()=>{this._opening=false;}),300+Math.random()*2200);}},1000);this.tk=0;}
-  componentWillUnmount(){window.removeEventListener('resize',this._rs);clearInterval(this.iv);clearTimeout(this.tt);}
+      const o=s.info&&s.info.course&&s.info.course.openAt;if(s.info&&s.info.phase==='notyet'&&o&&Date.now()+s.off>=o&&!this._fired){this._fired=true;this.startMusic();}if(s.info&&s.info.phase==='notyet'&&o&&Date.now()+s.off>=o&&!this._opening){this._opening=true;setTimeout(()=>this.refresh().then(()=>{this._opening=false;}),300+Math.random()*2200);}},1000);this.tk=0;}
+  componentWillUnmount(){['click','touchend','keydown'].forEach(ev=>document.removeEventListener(ev,this._g,true));clearInterval(this._fade);if(this._au)this._au.pause();window.removeEventListener('resize',this._rs);clearInterval(this.iv);clearTimeout(this.tt);}
   async boot(){const N=this.N;let cid=(new URL(location.href).searchParams.get('c')||'').toUpperCase();
     if(!cid){try{const r=await N.api('open');const x=r.ok&&r.courses.find(z=>z.course.type==='fcfs');if(x)cid=x.course.id;}catch(e){}}
     if(!cid&&N.LIVE&&window.top!==window){const u=new URL(location.href);u.searchParams.set('mock','1');location.replace(u.toString());return;}
     if(!cid)return this.setState({boot:false,err:'ลิงก์ไม่ครบถ้วน กรุณาเปิดจากลิงก์ที่ได้รับจากกองฝึกอบรม'});
-    this.cid=cid;await this.refresh();this.setState({boot:false});}
+    this.cid=cid;await this.refresh();this.setState({boot:false});setTimeout(()=>{const i=this.state.info;if(i&&i.phase==='open'&&i.course&&i.course.music&&!this._fired){this._fired=true;this.startMusic();}},0);}
   async call(a,d,n){for(let i=0;;i++){try{const r=await this.N.api(a,d);if(r&&r.busy&&i<n-1){await this.backoff(i);continue;}return r;}catch(e){if(i>=n-1)throw e;await this.backoff(i);}}}
   backoff(i){if(i===0)this.say('มีผู้ใช้งานพร้อมกันจำนวนมาก — ระบบกำลังต่อคิวให้อัตโนมัติ กรุณาอย่าปิดหน้านี้');return new Promise(r=>setTimeout(r,Math.min(8000,1200*Math.pow(1.6,i))+Math.random()*2000));}
   async refresh(){if(this._rf)return;this._rf=true;this.setState({refreshing:true});try{await this._refresh();}finally{this._rf=false;this.setState({refreshing:false});}}
-  async _refresh(){try{const r=await this.call('fcfsInfo',{c:this.cid},this.state.info?1:4);if(!r.ok)return this.setState({err:r.error||'ไม่พบหลักสูตร'});
+  async _refresh(){try{const r=await this.call('fcfsInfo',{c:this.cid},this.state.info?1:4);if(!r.ok)return this.setState({err:r.error||'ไม่พบหลักสูตร'});if(this._sim&&r.now<this._sim){r.phase='notyet';r.course=Object.assign({},r.course,{openAt:this._sim});}
       const pv=this.state.info;this._chg=this._chg||{};if(pv&&pv.regions)r.regions.forEach(g=>{const p=pv.regions.find(z=>z.region===g.region);if(p&&p.taken!==g.taken)this._chg[g.region]=Date.now();});this.tk=0;this.setState({upAt:Date.now()});
       this.setState(s=>({info:r,off:r.now-Date.now(),err:'',region:s.region?r.regions.find(g=>g.region===s.region.region)||s.region:null}));}
     catch(e){if(!this.state.info)this.setState({err:'เชื่อมต่อระบบไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'});}}
@@ -559,7 +597,7 @@ class Component extends DCLogic {
     return v;}
   _rv(){const s=this.state,N=this.N,info=s.info;
     const base={Y:this.layout(),loading:s.boot,notFound:!s.boot&&!info,loadErr:s.err,ready:!s.boot&&!!info,showDemo:!!N&&!N.LIVE,demoCodes:N&&!N.LIVE?N.demoCodes.map(d=>({key:d.code,label:d.label+' · '+d.code,on:()=>this.setState({emp:d.code,lkEmp:d.code,empErr:'',dup:false})})):[],
-      hasToast:!!s.toast,toast:s.toast,dlg:s.dlg,dlgBusy:s.dlgBusy,dlgNo:()=>this.setState({dlg:false}),dlgYes:()=>this.withdraw(),goLookup:()=>this.go('lookup'),goHome:()=>{this.setState({isExt:false,emp:'',person:null,region:null,email:'',phone:'',pdpa:false,fe:{},lkEmp:'',lkPhone:'',auth:null,res:null});this.go('landing');this.refresh();},year:new Date().getFullYear()};
+      hasToast:!!s.toast,toast:s.toast,dlg:s.dlg,dlgBusy:s.dlgBusy,dlgNo:()=>this.setState({dlg:false}),dlgYes:()=>this.withdraw(),goLookup:()=>this.go('lookup'),goHome:()=>{this.setState({isExt:false,emp:'',person:null,region:null,email:'',phone:'',pdpa:false,fe:{},lkEmp:'',lkPhone:'',auth:null,res:null});this.go('landing');this.refresh();},year:new Date().getFullYear(),simOpen:()=>this.simOpen(),Mu:{showArm:false,showPill:false}};
     if(!info)return base;const c=info.course,ph=info.phase,now=s.now+s.off,regs=info.regions.map(g=>this.regionVm(g)),allFull=regs.length&&regs.every(g=>g.full);
     const k=ph==='notyet'?'notyet':ph==='closed'?'closed':allFull?'full':regs.some(g=>g.fg!=='#12805C')?'near':'open';
     const C={open:['#EEF8F3','#CBEBDB','#12805C','#1E9E6E','เปิดรับสมัคร'],near:['#FFF7E8','#F6DDAE','#9A5B00','#E8930C','ใกล้เต็ม'],full:['#FDF0E4','#F2CFAE','#B85C00','#B85C00','ที่นั่งเต็ม · รับสำรอง'],closed:['#F1F4F8','#DCE3EC','#5A6B85','#9AA7B8','ปิดรับสมัคร'],notyet:['#EEF4FC','#CFE0F5','#1559B3','#1559B3','ยังไม่เปิดรับ']}[k];
@@ -569,10 +607,15 @@ class Component extends DCLogic {
         if(m){const w=hd.split(/\s+/);if(w.length>1){ac=w.pop();hd=w.join(' ');}}
         const L=(hd+ac).length;return {tHead:hd,tAccent:ac,hasAccent:!!ac,tSub:sub,hasSub:!!sub,tSize:s.mob?(m?(L>24?'32px':'38px'):(t.length>60?'22px':'26px')):(m?(L>24?'clamp(34px,4vw,52px)':'clamp(40px,5vw,66px)'):(t.length>60?'clamp(24px,2.6vw,32px)':'clamp(28px,3.4vw,42px)'))};})(),target:c.target||'',hasTarget:!!c.target,dateText:N.fmtRange(c.start,c.end),dateChip:'อบรม '+N.fmtRange(c.start,c.end),placeChip:N.placeText(c),hasCover:!!c.cover,noCover:!c.cover,cover:c.cover||'',coverBg:c.cover?'url("'+c.cover+'")':'none',
       coordText:c.coord&&c.coord.name?'ผู้ประสานงาน: '+c.coord.name+(c.coord.phone?' · โทร '+c.coord.phone:''):'กองฝึกอบรมภูมิภาค 2 · การประปาส่วนภูมิภาค',asOf,
-      isLanding:s.screen==='landing',isForm:s.screen==='form',isResult:s.screen==='result',isLookup:s.screen==='lookup',isClosed:ph==='closed',notClosed:ph!=='closed',dlText:N.fmtDT(c.deadline),
+      isLanding:s.screen==='landing',isForm:s.screen==='form',isResult:s.screen==='result',isLookup:s.screen==='lookup',isClosed:ph==='closed',notClosed:ph!=='closed',closedManual:ph==='closed'&&c.status==='closed',closedAuto:ph==='closed'&&c.status!=='closed',dlText:N.fmtDT(c.deadline),
       M:{bg:C[0],bd:C[1],fg:C[2],dot:C[3],label:C[4],sub:ph==='notyet'?'นับถอยหลังตามเวลาเซิร์ฟเวอร์':'ที่นั่งอัปเดตอัตโนมัติทุก 15 วินาที',hasSync:ph!=='notyet'&&ph!=='closed'&&!!s.upAt,syncText:s.upAt?'อัปเดตล่าสุด '+hms(s.upAt)+' น.':'',nextText:s.refreshing?'กำลังอัปเดต…':'อัปเดตถัดไปใน '+nxL+' วินาที',nextPct:(s.refreshing?0:nxL/15*100)+'%',spin:s.refreshing?'spin .9s linear infinite':'none',busy:!!s.refreshing,onNow:()=>this.refresh(),isNotYet:ph==='notyet',cd:secs(((c.openAt||0)-now)/1000),openText:'เปิดรับ '+N.fmtDT(c.openAt||0),regions:regs},
       rules:[{t:'รับสมัคร '+(c.openAt?N.fmtDT(c.openAt):'ตั้งแต่บัดนี้')+' – '+N.fmtDT(c.deadline)+' หรือจนกว่าจะปิดรับ'},{t:'เปิดรับเฉพาะ '+info.regions.map(g=>N.regionLabel(g.region)+' ('+g.seats+' ที่นั่ง)').join(', ')},
         {t:'ลำดับนับตามเวลาที่ระบบบันทึกสำเร็จ ไม่ใช่เวลาที่กดปุ่ม · สังกัดใดเต็มแล้วรับเป็นรายชื่อสำรองของสังกัดนั้น'},{t:'1 รหัสพนักงาน สมัครได้ 1 ครั้งต่อรุ่น'+(this.extOn()?' (บุคคลภายนอก: 1 เบอร์มือถือ ต่อ 1 ใบสมัคร)':'')+' · ผลการสมัครแสดงบนหน้าจอทันที ตรวจสอบซ้ำได้ด้วยรหัสพนักงาน + เบอร์โทร'}]});
+    {const hasM=!!c.music,ny=ph==='notyet',on=s.mArm&&!s.mMute;
+      base.Mu={showArm:hasM&&ny,showPill:hasM&&!ny&&ph!=='closed',armOn:on,armOff:!on,armLabel:on?'เปิดเสียงรอแล้ว':s.mMute?'ปิดเสียงไว้':'เปิดเสียงรอไว้',
+        armSub:on?'เพลงจะดังขึ้นทันทีเมื่อเปิดรับ · แตะเพื่อปิดเสียง':'แตะเพื่อเปิดเสียง · เพลงจะดังขึ้นทันทีเมื่อเปิดรับ',armBg:on?'#EEF8F3':'#fff',armBd:on?'#CBEBDB':'#CFE0F5',armFg:on?'#12805C':'#1559B3',
+        onArm:()=>{if(on){this.setState({mMute:true});}else{this.setState({mMute:false});this.arm();}},
+        playing:!!s.mOn,notPlaying:!s.mOn,pillLabel:s.mOn?'เพลงประกอบ · หยุด':'เล่นเพลง',pillTitle:c.musicName||'เพลงประกอบ',onPill:()=>this.toggleMusic()};}
     const lock=ph!=='open';
     base.L={emp:s.emp,onEmp:e=>this.setState({emp:e.target.value.replace(/\D/g,'').slice(0,6),empErr:'',dup:false}),onKey:e=>{if(e.key==='Enter'&&!lock)this.check();},lock,ph:lock?'ยังไม่เปิดรับสมัคร':'ตัวเลข 4–6 หลัก',
       inBd:s.empErr?'#E3A3AC':'#D6E0EC',inBg:lock?'#F1F4F8':'#fff',hasErr:!!s.empErr,err:s.empErr,dup:s.dup,checking:s.checking,btnOff:lock||s.checking,btnBg:lock?'#9AA7B8':'#1559B3',

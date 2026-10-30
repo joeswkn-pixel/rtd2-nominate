@@ -313,6 +313,7 @@ const MOCK=(function(){
       if(had)return {ok:true,already:true,session:s.label,at:had.at};L.push({session:s.id,code,at:now});save(d);return {ok:true,session:s.label,at:now};},
     ciLive(x){const d=load();sessUser(d,x.token);return {ok:true,checkins:((d.cks||{})[String(x.c||'').toUpperCase()]||[])};},
     uploadCover(x){const d=load();sessUser(d,x.token);return {ok:true,url:'data:'+x.mime+';base64,'+x.data};},
+    uploadMusic(x){const d=load();sessUser(d,x.token);return {ok:true,url:'data:'+x.mime+';base64,'+x.data};},
     adminEditReg(x){const d=load(),u=sessUser(d,x.token),c=C(d,x.c);if(!c||c.type!=='fcfs')return {ok:false,error:'ไม่พบหลักสูตร'};
       if(!canEdit(u,c)&&(c.owners||[]).length)return {ok:false,error:'ไม่มีสิทธิ์แก้ไขหลักสูตรนี้'};
       const L=(d.regs||{})[c.id]||[],m=L.find(r=>r.ref===x.ref);if(!m)return {ok:false,error:'ไม่พบใบสมัคร'};
@@ -342,7 +343,8 @@ const formUrl=(cid,view)=>{let b=String(CFG.FORM_URL||'').trim();if(!b)b=locatio
 
 const sib=(file,cid)=>{let b=String(CFG.FORM_URL||'').trim()||location.href;b=b.split('#')[0].split('?')[0];b=b.slice(0,b.lastIndexOf('/')+1)+encodeURIComponent(file);const q=[];if(cid)q.push('c='+encodeURIComponent(cid));if(DEMO_Q){try{const p=new URL(location.href).searchParams;q.push(p.has('mock')?'mock':'demo');}catch(e){}}return b+(q.length?'?'+q.join('&'):'');};
 const fcfsUrl=cid=>sib(CFG.FCFS_PAGE||'Self Registration FCFS.dc.html',cid),checkinUrl=cid=>sib(CFG.CHECKIN_PAGE||'Check-in.dc.html',cid);
-window.NOM2={CFG,LIVE,api,formUrl,fcfsUrl,checkinUrl,FORMATS,APPS,appName,placeText,maskEmail,fcfsPhase,fcfsRank,fcfsRegions,AFFILS,regionLabel,regionSum,ciWin,pad4,fmtD,fmtDw,fmtDs,fmtDT,fmtRange,hm,iso,toMs,leftText,REASONS,TYPES,WHO,normCode,isClosed,active,reasonText,validate,
+const audioSrc=u=>{u=String(u||'').trim();const m=u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:[^#]*&)?id=)([\w-]{20,})/);return m&&!/export=download/.test(u)?'https://drive.google.com/uc?export=download&id='+m[1]:u;};
+window.NOM2={CFG,LIVE,api,audioSrc,formUrl,fcfsUrl,checkinUrl,FORMATS,APPS,appName,placeText,maskEmail,fcfsPhase,fcfsRank,fcfsRegions,AFFILS,regionLabel,regionSum,ciWin,pad4,fmtD,fmtDw,fmtDs,fmtDT,fmtRange,hm,iso,toMs,leftText,REASONS,TYPES,WHO,normCode,isClosed,active,reasonText,validate,
   demoCodes:[{code:DEMO.mgr.code,label:'ผจก.สาขาขอนแก่น'},{code:DEMO.mgr2.code,label:'ผจก.สาขาหนองคาย'},{code:DEMO.staff.code,label:'พนักงาน สาขาขอนแก่น'},{code:DEMO.qc.code,label:'นักวิทย์ งคน.6'},{code:BASE.emps.find(e=>e.region===0).code,label:'พนักงาน สนญ.'}],
   demoUsers:[{email:'admin.rtc2@pwa.co.th',label:'ผู้ดูแลระบบ'},{email:'kanokporn.s@pwa.co.th',label:'เจ้าหน้าที่'}],
   resetDemo:()=>MOCK.reset(),UNITS:BASE.units};

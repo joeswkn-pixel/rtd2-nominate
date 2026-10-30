@@ -15,7 +15,7 @@
 </helmet>
 <div style="max-width:980px;margin:0 auto;padding:clamp(16px,4vw,40px) clamp(12px,3vw,28px) 60px;display:flex;flex-direction:column;gap:18px">
   <div style="display:flex;flex-direction:column;gap:6px">
-    <div style="font-size:13px;font-weight:600;color:#1559B3;letter-spacing:.04em">เครื่องมือผู้ดูแล · ทดสอบก่อนเปิดรับจริง</div>
+    <div style="font-size:13px;font-weight:600;color:#1559B3;letter-spacing:.04em">เครื่องมือผู้ดูแล · ทดสอบก่อนเปิดรับจริง · หน้าทดสอบ v3</div>
     <div style="font-size:clamp(26px,3.4vw,34px);font-weight:700">ทดสอบรับคนเข้าพร้อมกัน</div>
     <div style="font-size:14.5px;color:#5A6B85;max-width:720px;text-wrap:pretty">จำลองคนเข้าระบบสมัครแบบใครก่อนได้ก่อนพร้อมกันหลายร้อยคน โดยใช้การลองส่งใหม่และการเว้นช่วงแบบเดียวกับหน้าสมัครจริง</div>
   </div>
@@ -123,6 +123,8 @@ class Component extends DCLogic {
     if(s.on.check&&!/^\d{4,6}$/.test(s.code.trim()))return this.setState({formErr:'กรุณาใส่รหัสพนักงานตัวอย่าง 4–6 หลัก (หรือปิดขั้นที่ 2)'});
     if(!Object.values(s.on).some(Boolean))return this.setState({formErr:'เลือกอย่างน้อย 1 ขั้น'});
     this.setState({formErr:''});
+    const vv=await this.one('ver',{},2);
+    if(!vv.ok||vv.r.ver!=='rush-3')return this.setState({formErr:'Apps Script ที่ใช้งานจริงยังเป็นเวอร์ชันเก่า'+(vv.r&&vv.r.ver?' ('+vv.r.ver+')':'')+' — ไปที่ Deploy › Manage deployments › ✏️ Edit › Version: New version › Deploy แล้วลองใหม่'});
     const pre=await this.one('fcfsInfo',{c:cid},2);
     if(!pre.ok)return this.setState({formErr:'เปิดหลักสูตร '+cid+' ไม่ได้: '+pre.err});
     const t=(pre.r.course&&pre.r.course.title)||'';

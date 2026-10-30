@@ -468,16 +468,18 @@ class Component extends DCLogic {
   componentDidMount(){this.setState({mob:this.isMob()});this.setState({wide:window.innerWidth>=960});this._rs=()=>{const w=window.innerWidth>=960;if(w!==!!this.state.wide)this.setState({wide:w});const m=this.isMob();if(m!==!!this.state.mob)this.setState({mob:m});};window.addEventListener('resize',this._rs);const files=['./nom2-config.js','./nom2-core.js'];
     const load=i=>{if(window.NOM2)return this.boot();if(i>=files.length)return;const sc=document.createElement('script');sc.src=files[i];sc.onload=()=>load(i+1);sc.onerror=()=>this.setState({boot:false,err:'โหลดระบบไม่สำเร็จ'});document.head.appendChild(sc);};
     load(window.NOM2_CONFIG?1:0);
-    this.iv=setInterval(()=>{const s=this.state;this.setState({now:Date.now()});if(this.cid&&!s.saving&&(s.screen==='landing'||s.screen==='form')&&++this.tk%15===0)this.refresh();
-      const o=s.info&&s.info.course&&s.info.course.openAt;if(s.info&&s.info.phase==='notyet'&&o&&Date.now()+s.off>=o&&!this._opening){this._opening=true;this.refresh().then(()=>{this._opening=false;});}},1000);this.tk=0;}
+    this.iv=setInterval(()=>{const s=this.state;this.setState({now:Date.now()});if(this.cid&&!s.saving&&(s.screen==='landing'||s.screen==='form')&&++this.tk>=(this.pv||(this.pv=25+Math.floor(Math.random()*11))))this.refresh();
+      const o=s.info&&s.info.course&&s.info.course.openAt;if(s.info&&s.info.phase==='notyet'&&o&&Date.now()+s.off>=o&&!this._opening){this._opening=true;setTimeout(()=>this.refresh().then(()=>{this._opening=false;}),300+Math.random()*2200);}},1000);this.tk=0;}
   componentWillUnmount(){window.removeEventListener('resize',this._rs);clearInterval(this.iv);clearTimeout(this.tt);}
   async boot(){const N=this.N;let cid=(new URL(location.href).searchParams.get('c')||'').toUpperCase();
     if(!cid){try{const r=await N.api('open');const x=r.ok&&r.courses.find(z=>z.course.type==='fcfs');if(x)cid=x.course.id;}catch(e){}}
     if(!cid&&N.LIVE&&window.top!==window){const u=new URL(location.href);u.searchParams.set('mock','1');location.replace(u.toString());return;}
     if(!cid)return this.setState({boot:false,err:'ลิงก์ไม่ครบถ้วน กรุณาเปิดจากลิงก์ที่ได้รับจากกองฝึกอบรม'});
     this.cid=cid;await this.refresh();this.setState({boot:false});}
+  async call(a,d,n){for(let i=0;;i++){try{const r=await this.N.api(a,d);if(r&&r.busy&&i<n-1){await this.backoff(i);continue;}return r;}catch(e){if(i>=n-1)throw e;await this.backoff(i);}}}
+  backoff(i){if(i===0)this.say('มีผู้ใช้งานพร้อมกันจำนวนมาก — ระบบกำลังต่อคิวให้อัตโนมัติ กรุณาอย่าปิดหน้านี้');return new Promise(r=>setTimeout(r,Math.min(7000,1200*Math.pow(1.6,i))+Math.random()*1500));}
   async refresh(){if(this._rf)return;this._rf=true;this.setState({refreshing:true});try{await this._refresh();}finally{this._rf=false;this.setState({refreshing:false});}}
-  async _refresh(){try{const r=await this.N.api('fcfsInfo',{c:this.cid});if(!r.ok)return this.setState({err:r.error||'ไม่พบหลักสูตร'});
+  async _refresh(){try{const r=await this.call('fcfsInfo',{c:this.cid},this.state.info?1:4);if(!r.ok)return this.setState({err:r.error||'ไม่พบหลักสูตร'});
       const pv=this.state.info;this._chg=this._chg||{};if(pv&&pv.regions)r.regions.forEach(g=>{const p=pv.regions.find(z=>z.region===g.region);if(p&&p.taken!==g.taken)this._chg[g.region]=Date.now();});this.tk=0;this.setState({upAt:Date.now()});
       this.setState(s=>({info:r,off:r.now-Date.now(),err:'',region:s.region?r.regions.find(g=>g.region===s.region.region)||s.region:null}));}
     catch(e){if(!this.state.info)this.setState({err:'เชื่อมต่อระบบไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'});}}
@@ -516,7 +518,7 @@ class Component extends DCLogic {
   go(k){if(k!=='result')this.setState({fresh:false});this.setState({screen:k,empErr:'',dup:false,lkErr:'',saveErr:''});try{window.scrollTo(0,0);}catch(e){}}
   async check(){const s=this.state,e=s.emp.trim();if(!/^\d{4,6}$/.test(e))return this.setState({empErr:'กรุณากรอกรหัสพนักงานเป็นตัวเลข 4–6 หลัก',dup:false});
     this.setState({checking:true,empErr:'',dup:false});
-    try{const r=await this.N.api('fcfsCheck',{c:this.cid,code:e});
+    try{const r=await this.call('fcfsCheck',{c:this.cid,code:e},5);
       if(!r.ok)return this.setState({checking:false,empErr:r.error});
       if(r.dup)return this.setState({checking:false,dup:true,lkEmp:e});
       this.setState({checking:false,person:r.emp,region:r.region,isExt:false,fe:{},saveErr:'',email:'',phone:'',pdpa:false});this.go('form');}
@@ -526,13 +528,13 @@ class Component extends DCLogic {
     if(Object.values(fe).some(Boolean))return this.setState({fe});
     this.setState({fe:{},saving:true,saveErr:''});
     try{const code=ext?'X'+s.phone:s.person.code;
-      const r=await this.N.api('fcfsRegister',ext?{c:this.cid,ext:{prefix:pfx,first:s.fn.trim(),last:s.ln.trim(),org:s.org.trim(),pos:s.xpos.trim()},email:s.email,phone:s.phone}:{c:this.cid,code,email:s.email,phone:s.phone});
+      const r=await this.call('fcfsRegister',ext?{c:this.cid,ext:{prefix:pfx,first:s.fn.trim(),last:s.ln.trim(),org:s.org.trim(),pos:s.xpos.trim()},email:s.email,phone:s.phone}:{c:this.cid,code,email:s.email,phone:s.phone},9);
       if(!r.ok){this.setState({saving:false,saveErr:r.error||'บันทึกไม่สำเร็จ'});return;}
       const win=r.res&&r.res.st==='seat'&&!r.dup;this.setState({saving:false,res:r.res,auth:{code,phone:s.phone},fresh:win});this.go('result');if(win)setTimeout(()=>this.celebrate(),380);if(r.dup)this.say(ext?'เบอร์นี้สมัครไว้แล้ว — แสดงลำดับเดิม':'รหัสนี้สมัครไว้แล้ว — แสดงลำดับเดิม');this.refresh();}
     catch(x){this.setState({saving:false,saveErr:'ไม่สามารถยืนยันผลการบันทึกได้'});}}
   async lookup(){const s=this.state,xo=this.extOn(),code=s.lkEmp||(xo?'X'+s.lkPhone:'');if(!/^0\d{9}$/.test(s.lkPhone)||(s.lkEmp?!/^\d{4,6}$/.test(s.lkEmp):!xo))return this.setState({lkErr:xo?'กรุณากรอกเบอร์โทร 10 หลัก (พนักงาน กปภ. กรอกรหัสพนักงาน 4–6 หลักด้วย)':'กรุณากรอกรหัสพนักงาน 4–6 หลัก และเบอร์โทร 10 หลัก'});
     this.setState({lkBusy:true,lkErr:''});
-    try{const r=await this.N.api('fcfsMine',{c:this.cid,code,phone:s.lkPhone});if(!r.ok)return this.setState({lkBusy:false,lkErr:r.error});
+    try{const r=await this.call('fcfsMine',{c:this.cid,code,phone:s.lkPhone},4);if(!r.ok)return this.setState({lkBusy:false,lkErr:r.error});
       this.setState({lkBusy:false,res:r.res,auth:{code,phone:s.lkPhone}});this.go('result');}
     catch(x){this.setState({lkBusy:false,lkErr:'เชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่'});}}
   async withdraw(){const s=this.state;if(!s.auth)return;this.setState({dlgBusy:true});

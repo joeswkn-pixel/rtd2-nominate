@@ -1010,18 +1010,6 @@ button{-webkit-tap-highlight-color:transparent}
               </div>
               <div style="font-size:13px;font-weight:700;color:#0F3A72;">{{ A.f.seatTotal }}</div>
             </div>
-            <div data-screen-label="Background music" style="background:#fff;border:1px solid #E6EAF2;border-radius:16px;padding:20px 22px;box-shadow:0 4px 16px rgba(16,35,59,.06);display:flex;flex-direction:column;gap:12px;">
-              <div><div style="font-size:15px;font-weight:700;color:#1E5AA8;">เพลงประกอบหน้าสมัคร</div><div style="font-size:12.5px;color:#5A6B85;line-height:1.55;">ดังขึ้นอัตโนมัติตอนนับถอยหลังครบและเปิดรับสมัคร สำหรับผู้ที่เปิดหน้ารอไว้ · เล่นวนซ้ำ ผู้สมัครกดหยุดได้</div></div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                <label style="height:40px;padding:0 14px;border-radius:10px;background:#1E5AA8;color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;gap:7px;cursor:pointer;" style-hover="filter:brightness(1.08);"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="17" cy="16" r="3"></circle></svg>{{ A.f.musicBtn }}<input type="file" accept="audio/*,.mp3,.m4a,.aac,.ogg,.wav" onChange="{{ A.f.onMusicFile }}" style="display:none;"></label>
-                <sc-if value="{{ A.f.hasMusic }}" hint-placeholder-val="{{ false }}"><button onClick="{{ A.f.onMusicClear }}" style="height:40px;padding:0 14px;border:1px solid #F0C4BE;border-radius:10px;background:#fff;color:#C0392B;font-size:13px;font-weight:600;">ลบเพลง</button></sc-if>
-                <sc-if value="{{ A.f.hasMusic }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;font-weight:600;color:#2B3645;min-width:0;overflow-wrap:anywhere;">{{ A.f.musicName }}</span></sc-if>
-                <sc-if value="{{ A.f.hasMusicInfo }}" hint-placeholder-val="{{ false }}"><span style="font-size:12.5px;color:#5A6B85;">{{ A.f.musicInfo }}</span></sc-if>
-              </div>
-              <sc-if value="{{ A.f.hasMusic }}" hint-placeholder-val="{{ false }}"><audio controls="" preload="none" src="{{ A.f.musicSrc }}" style="width:100%;height:40px;"></audio></sc-if>
-              <label style="display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:600;color:#5A6B85;">หรือวางลิงก์ไฟล์เสียง<input value="{{ A.f.musicUrl }}" onChange="{{ A.f.on_musicUrl }}" placeholder="https://drive.google.com/file/d/…/view" style="height:42px;padding:0 11px;border:1px solid #D8DFEA;border-radius:9px;font-weight:400;color:#16233B;background:#fff;font-size:13px;"></label>
-              <div style="font-size:12px;color:#5A6B85;line-height:1.6;">MP3 / M4A ไม่เกิน 15 MB · ลิงก์ Google Drive ต้องแชร์แบบ "ทุกคนที่มีลิงก์" · เบราว์เซอร์อนุญาตให้เพลงดังได้เมื่อผู้ใช้เคยแตะหน้าจอ ระบบจึงมีปุ่ม "เปิดเสียงรอไว้" ในกล่องนับถอยหลัง</div>
-            </div>
             <div data-screen-label="Course cover" style="background:#fff;border:1px solid #E6EAF2;border-radius:16px;padding:20px 22px;box-shadow:0 4px 16px rgba(16,35,59,.06);display:flex;flex-direction:column;gap:12px;">
               <div><div style="font-size:15px;font-weight:700;color:#1E5AA8;">ภาพปกหลักสูตร</div><div style="font-size:12.5px;color:#5A6B85;">แสดงด้านซ้ายของหน้าสมัคร (บนมือถือแสดงเป็นแบนเนอร์ด้านบน)</div></div>
               <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
@@ -1501,13 +1489,13 @@ class Component extends DCLogic {
     return {isNew:!c,id:x.id,title:x.title,round:x.round,courseNo:x.courseNo||'',start:N.iso(x.start),end:N.iso(x.end||x.start),place:x.place,target:x.target,dlDate:N.iso(x.deadline),dlTime:String(dl.getHours()).padStart(2,'0')+':'+String(dl.getMinutes()).padStart(2,'0'),
       capacity:x.capacity?String(x.capacity):'',quota:x.quota?String(x.quota):'',type:x.type,who:x.who,defaultAttend:!!x.defaultAttend,rounds:(x.rounds||[]).map(r=>Object.assign({},r)),instructions:x.instructions||'',owners:(x.owners||[]).slice(),
       coordName:(x.coord||{}).name||'',coordPhone:(x.coord||{}).phone||'',coordEmail:(x.coord||{}).email||'',groupQr:x.groupQr||'',groupLink:x.groupLink||'',curCodes:cur,
-      format:x.format||'onsite',app:x.app||'zoom',appName:x.appName||'',cover:x.cover||'',coverUrl:/^https?:/.test(x.cover||'')?x.cover:'',coverInfo:'',music:x.music||'',musicName:x.musicName||'',musicUrl:/^https?:/.test(x.music||'')?x.music:'',musicInfo:'',openDate:N.iso(x.openAt||now),openTime:(()=>{const o=new Date(x.openAt||now);return String(o.getHours()).padStart(2,'0')+':'+String(o.getMinutes()).padStart(2,'0');})(),
+      format:x.format||'onsite',app:x.app||'zoom',appName:x.appName||'',cover:x.cover||'',coverUrl:/^https?:/.test(x.cover||'')?x.cover:'',coverInfo:'',openDate:N.iso(x.openAt||now),openTime:(()=>{const o=new Date(x.openAt||now);return String(o.getHours()).padStart(2,'0')+':'+String(o.getMinutes()).padStart(2,'0');})(),
       regionSeats:Object.assign({},x.regionSeats||{}),affils:N.AFFILS.map(z=>z.key).filter(k=>(+(x.regionSeats||{})[k]||0)>0),ciOn:!!(x.checkin&&x.checkin.on),ciSessions:((x.checkin||{}).sessions||[]).map(z=>Object.assign({},z)),ciRoster:((x.checkin||{}).roster||[]).join('\n'),impText:'',fileName:'',codeCol:-1,roundCol:'auto',mode:c?'append':'replace',badOnly:false,impStatus:true,err:'',busy:false};}
   setFf(p){this.setA(a=>({f:Object.assign({},a.f,p)}));}
   async saveForm(){const N=this.N,f=this.state.adm.f;if(f.busy)return;
     const fc=f.type==='fcfs',seats={};Object.keys(f.regionSeats||{}).filter(k=>(f.affils||[]).indexOf(k)>=0).forEach(k=>{const v=parseInt(f.regionSeats[k],10)||0;if(v>0)seats[k]=v;});
     const course={id:f.id,title:f.title.trim(),round:f.round,courseNo:String(f.courseNo||'').trim(),start:N.toMs(f.start,'09:00'),end:N.toMs(f.end||f.start,'16:00'),place:f.format==='onsite'?f.place:'',format:f.format,app:f.format==='online2'?f.app:'',appName:f.format==='online2'&&f.app==='other'?String(f.appName||'').trim():'',
-      cover:fc?(f.cover||''):'',music:fc?(f.music||''):'',musicName:fc?(f.musicName||''):'',openAt:fc?N.toMs(f.openDate,f.openTime):0,regionSeats:fc?seats:{},
+      cover:fc?(f.cover||''):'',openAt:fc?N.toMs(f.openDate,f.openTime):0,regionSeats:fc?seats:{},
       checkin:{on:f.format==='online2'&&!!f.ciOn,sessions:f.ciSessions.filter(z=>z.date&&z.start&&z.end),roster:this.rosterCodes(f.ciRoster)},target:f.target,deadline:N.toMs(f.dlDate,f.dlTime),
       capacity:fc?Object.values(seats).reduce((a,b)=>a+b,0):(parseInt(f.capacity,10)||0),quota:f.type==='confirm'||fc?0:(parseInt(f.quota,10)||0),type:f.type,who:f.who,defaultAttend:f.type==='confirm'&&f.defaultAttend,rounds:f.rounds.filter(r=>r.label.trim()),
       instructions:f.instructions,owners:f.owners,coord:{name:f.coordName,phone:f.coordPhone,email:f.coordEmail},groupQr:f.groupQr||'',groupLink:String(f.groupLink||'').trim()};
@@ -1536,16 +1524,6 @@ class Component extends DCLogic {
   ciAuto(){const N=this.N,f=this.state.adm.f;if(!f.start)return this.toast('กรุณาระบุวันเริ่มอบรมก่อน','err');const a=N.toMs(f.start),b=N.toMs(f.end||f.start),out=[];let i=1;
     for(let t=a;t<=b&&i<=14;t+=864e5,i++){const dt=N.iso(t);out.push({id:'d'+i+'am',label:'วันที่ '+i+' · เช้า',date:dt,start:'08:30',end:'12:00',code:this.rand4()},{id:'d'+i+'pm',label:'วันที่ '+i+' · บ่าย',date:dt,start:'13:00',end:'16:30',code:this.rand4()});}
     this.setFf({ciSessions:out});}
-  onMusicFile(ev){const file=ev.target.files&&ev.target.files[0];ev.target.value='';if(!file)return;
-    if(!/^audio\//.test(file.type)&&!/\.(mp3|m4a|aac|ogg|wav)$/i.test(file.name))return this.toast('รองรับเฉพาะไฟล์เสียง MP3 / M4A / OGG / WAV','err');
-    const LIVE=this.N.LIVE,lim=LIVE?15:2;if(file.size>lim*1048576)return this.toast(LIVE?'ไฟล์ใหญ่เกิน 15 MB':'โหมดทดลองรองรับไฟล์ไม่เกิน 2 MB (ระบบจริงรองรับ 15 MB)','err');
-    const info=(file.size/1048576).toFixed(1)+' MB',rd=new FileReader();
-    rd.onload=async()=>{const url=String(rd.result);if(!LIVE){this.setFf({music:url,musicName:file.name,musicUrl:'',musicInfo:info});return;}
-      this.setFf({musicInfo:'กำลังอัปโหลด…'});
-      const r=await this.N.api('uploadMusic',{token:this.state.sess.token,name:file.name,mime:file.type||'audio/mpeg',data:url.split(',')[1]});if(!this.chk(r))return;
-      if(!r.ok){this.setFf({musicInfo:''});return this.toast(r.error||'อัปโหลดไม่สำเร็จ','err');}
-      this.setFf({music:r.url,musicName:file.name,musicUrl:r.url,musicInfo:info});this.toast('อัปโหลดเพลงแล้ว — กดบันทึกหลักสูตรเพื่อใช้งาน');};
-    rd.readAsDataURL(file);}
   onCoverFile(ev){const file=ev.target.files&&ev.target.files[0];ev.target.value='';if(!file)return;
     if(['image/jpeg','image/png','image/gif'].indexOf(file.type)<0)return this.toast('รองรับเฉพาะไฟล์ JPG / PNG / GIF','err');
     if(file.size>5*1024*1024)return this.toast('ไฟล์ใหญ่เกิน 5 MB','err');
@@ -1881,8 +1859,6 @@ class Component extends DCLogic {
         noAffil:!(f.affils||[]).length,hasAffil:!!(f.affils||[]).length,
         regionRows:(f.affils||[]).map(g=>{const v=(f.regionSeats||{})[g]||'',on=(parseInt(v,10)||0)>0;return {key:'g'+g,label:N.regionLabel(g),val:String(v),on:ev=>this.setFf({regionSeats:Object.assign({},f.regionSeats,{[g]:ev.target.value.replace(/\D/g,'').slice(0,4)})}),bd:on?'#1E5AA8':'#E6EAF2',bg:on?'#F3F7FC':'#fff',fg:on?'#0F3A72':'#5A6B85'};}),
         seatTotal:'รวม '+seatsN+' ที่นั่ง · '+Object.keys(f.regionSeats||{}).filter(k=>(parseInt(f.regionSeats[k],10)||0)>0).length+' สังกัด',
-        hasMusic:!!f.music,noMusic:!f.music,musicSrc:N.audioSrc?N.audioSrc(f.music):f.music,musicBtn:f.music?'เปลี่ยนเพลง':'อัปโหลดเพลง',musicName:f.musicName||(f.music?'ลิงก์เพลง':''),onMusicFile:ev=>this.onMusicFile(ev),
-        onMusicClear:()=>this.setFf({music:'',musicName:'',musicUrl:'',musicInfo:''}),musicUrl:f.musicUrl||'',on_musicUrl:ev=>{const v=ev.target.value.trim();this.setFf({musicUrl:v,music:/^https?:\/\//.test(v)?v:(f.music===f.musicUrl?'':f.music),musicName:/^https?:\/\//.test(v)?'':f.musicName,musicInfo:''});},hasMusicInfo:!!f.musicInfo,musicInfo:f.musicInfo||'',
         hasCover:!!f.cover,noCover:!f.cover,cover:f.cover||'',coverBg:f.cover?'url("'+f.cover+'")':'none',coverBtn:f.cover?'เปลี่ยนภาพ':'อัปโหลดภาพปก',onCoverFile:ev=>this.onCoverFile(ev),onCoverClear:()=>this.setFf({cover:'',coverUrl:'',coverInfo:''}),
         coverUrl:f.coverUrl||'',on_coverUrl:ev=>{const v=ev.target.value.trim();this.setFf({coverUrl:v,cover:/^https?:\/\//.test(v)?v:f.cover,coverInfo:''});},hasCoverInfo:!!f.coverInfo,coverInfo:f.coverInfo||'',coverInfoFg:f.coverOk===false?'#8A6100':'#12805C',
         ciOn:!!f.ciOn,onCiOn:ev=>{const on=ev.target.checked;this.setFf({ciOn:on});if(on&&!f.ciSessions.length)setTimeout(()=>this.ciAuto(),0);},onCiAuto:()=>this.ciAuto(),
